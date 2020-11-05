@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun switchToRegisterPage(v: View) {
-        var intent = Intent(this, Register::class.java)
+        val intent = Intent(this, Register::class.java)
         startActivity(intent)
     }
 }
