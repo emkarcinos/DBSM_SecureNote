@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import emkarcinos.dbsm_securenote.backend.FileManager
+import emkarcinos.dbsm_securenote.backend.NoteActivity
 import emkarcinos.dbsm_securenote.backend.Security
 import emkarcinos.dbsm_securenote.backend.User
 
@@ -31,8 +32,13 @@ class MainActivity : AppCompatActivity() {
 
     fun loginButtonClick(v: View){
         val user = authenticate(v)
-        if(user != null)
+        if(user != null){
             Toast.makeText(this,"Successfully authenticated.", Toast.LENGTH_SHORT).show()
+            var intent = Intent(this, NoteActivity::class.java)
+            intent.putExtra("username", user.username)
+            intent.putExtra("password", user.passwordHash)
+            startActivity(intent)
+        }
     }
 
     fun authenticate(v: View): User?{
