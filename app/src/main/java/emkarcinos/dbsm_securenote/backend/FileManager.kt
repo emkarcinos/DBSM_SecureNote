@@ -1,6 +1,7 @@
 package emkarcinos.dbsm_securenote.backend
 
 import java.io.File
+import java.nio.charset.Charset
 
 object FileManager {
     private lateinit var directory: String
@@ -22,5 +23,13 @@ object FileManager {
         }
 
         return true
+    }
+
+    fun grabUser(username: String): User {
+        val filename = Security.generateHash(username)
+        val file = File(directory, filename)
+        val passwordHash = file.readLines(Charset.defaultCharset())[0]
+
+        return User(username, passwordHash)
     }
 }
