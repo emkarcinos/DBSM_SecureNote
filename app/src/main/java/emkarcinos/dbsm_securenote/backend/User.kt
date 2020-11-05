@@ -1,16 +1,13 @@
 package emkarcinos.dbsm_securenote.backend
 
 class User {
-    private var username: String
-        get() {
-            return field
-        }
+    var username: String
+        private set
 
-    private var passwordHash: String
-    private var note: Note? = null
-        set(value) {
-            field = value
-        }
+    var passwordHash: String
+        private set
+
+    var note: Note? = null
 
     constructor(username: String, password: String) {
         this.username = username
