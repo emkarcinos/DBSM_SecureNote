@@ -5,4 +5,9 @@
     <string name="login_button">Log in</string>
     <string name="register_button">Create account</string>
     <string name="welcome_text">Authenticate</string>
+
+    <string name="register_text">Register</string>
+    <string name="confirm_text">Confirm</string>
+    <string name="pass_repear">Repeat Password</string>
+    <string name="submit_new_account">Submit</string>
 </resources>
