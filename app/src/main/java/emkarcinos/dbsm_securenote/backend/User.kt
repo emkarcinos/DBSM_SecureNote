@@ -5,7 +5,6 @@ class User {
         private set
 
     var passwordHash: String
-        private set
 
     var note: Note? = null
 
