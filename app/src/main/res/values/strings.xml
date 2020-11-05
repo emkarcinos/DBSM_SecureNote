@@ -10,4 +10,5 @@
     <string name="confirm_text">Confirm</string>
     <string name="pass_repear">Repeat Password</string>
     <string name="submit_new_account">Submit</string>
+    <string name="updateNoteBtn">Save Note</string>
 </resources>
