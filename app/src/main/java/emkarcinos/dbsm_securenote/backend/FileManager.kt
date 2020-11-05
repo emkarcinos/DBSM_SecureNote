@@ -4,7 +4,7 @@ import java.io.File
 import java.nio.charset.Charset
 
 object FileManager {
-    lateinit var directory: String
+    lateinit var directory: File
 
     /**
      * Attempts to save new user data to a local storage.
