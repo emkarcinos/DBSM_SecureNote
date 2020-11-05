@@ -1,6 +1,8 @@
 package emkarcinos.dbsm_securenote.backend
 
+import java.io.BufferedReader
 import java.io.File
+import java.io.FileReader
 import java.nio.charset.Charset
 
 object FileManager {
@@ -25,11 +27,16 @@ object FileManager {
         return true
     }
 
-    fun grabUser(username: String): User {
+    fun grabUser(username: String): User? {
         val filename = Security.generateHash(username)
         val file = File(directory, filename)
-        val passwordHash = file.readLines(Charset.defaultCharset())[0]
+        if(!file.exists())
+            return null
+        val reader = BufferedReader(FileReader(file))
+        val passwordHash = reader.readLine()
 
-        return User(username, passwordHash)
+        var user = User(username, "")
+        user.passwordHash = passwordHash
+        return user
     }
 }
