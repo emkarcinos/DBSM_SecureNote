@@ -36,9 +36,15 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this,"Successfully authenticated.", Toast.LENGTH_SHORT).show()
             var intent = Intent(this, NoteActivity::class.java)
             intent.putExtra("username", user.username)
-            intent.putExtra("password", user.passwordHash)
+            intent.putExtra("password", passwordBox.editableText.toString().trim())
             startActivity(intent)
+            clearTextBoxes()
         }
+    }
+
+    fun clearTextBoxes(){
+        usernameBox.editableText.clear()
+        passwordBox.editableText.clear()
     }
 
     fun authenticate(v: View): User?{
@@ -66,6 +72,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         if(passwordHash != user.passwordHash){
+            passwordBox.editableText.clear()
             passwordBox.error = "Invalid password."
             return null
         }
