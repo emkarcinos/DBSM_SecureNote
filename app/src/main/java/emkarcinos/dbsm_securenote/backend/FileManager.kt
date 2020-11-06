@@ -27,6 +27,11 @@ object FileManager {
         return true
     }
 
+    /**
+     * Attempts to load a user from a local storage.
+     * @return On success, returns a new User instance.
+     * If the user dosen't exist, returns null.
+     */
     fun grabUser(username: String): User? {
         val filename = Security.generateHash(username)
         val file = File(directory, filename)
