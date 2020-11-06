@@ -11,4 +11,7 @@
     <string name="pass_repear">Repeat Password</string>
     <string name="submit_new_account">Submit</string>
     <string name="updateNoteBtn">Save Note</string>
+    <string name="change_password">Change password</string>
+    <string name="old_password">Current password</string>
+    <string name="new_password">New password</string>
 </resources>
