@@ -5,6 +5,7 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 import java.io.PrintWriter
+import java.lang.StringBuilder
 
 object FileManager {
     lateinit var directory: File
@@ -65,16 +66,7 @@ object FileManager {
         val file = File(directory, filename)
         val printer = PrintWriter(file)
         printer.print(string)
-    }
-
-    /**
-     * Clears given file's contents, and writes an array of strings as lines into it.
-     */
-    fun saveTextLines(filename: String, text: List<String>) {
-        val file = File(directory, filename)
-        val printer = PrintWriter(file)
-        for(line: String in text)
-            printer.println(line)
+        printer.flush()
     }
 
     /**
@@ -82,26 +74,18 @@ object FileManager {
      */
     fun readText(filename: String): String? {
         val file = File(directory, filename)
+        if(!file.exists())
+            return null
+
         val reader = BufferedReader(FileReader(file))
+        val strings = reader.readLines()
 
-        return reader.readLine()
-    }
+        val builder = StringBuilder()
 
-    /**
-     * Attempts to read all lines from a given file.
-     */
-    fun readTextLines(filename: String): List<String> {
-        val file = File(directory, filename)
-        val reader = BufferedReader(FileReader(file))
+        for(text: String in strings)
+            builder.append(text+"\n")
 
-        var lines = ArrayList<String>()
-        var line: String = ""
-        while(line != null){
-            line = reader.readLine()
-            lines.add(line)
-        }
-
-        return lines
+        return builder.substring(0, builder.lastIndex)
     }
 
 }
