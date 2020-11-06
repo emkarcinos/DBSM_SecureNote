@@ -8,6 +8,7 @@ import java.nio.file.Files
 object FileManager {
     lateinit var directory: File
 
+    private val subDirectory: String = "files"
     /**
      * Attempts to save new user data to a local storage.
      * @return true, if the user does not already exist;
@@ -58,7 +59,10 @@ object FileManager {
     }
 
     fun saveBytes(filename: String, data: ByteArray) {
-        val file = File(directory, filename)
+        val subfolder = File(directory, subDirectory)
+        if(!subfolder.exists())
+            subfolder.mkdir()
+        val file = File(subfolder, filename)
         val printer = FileOutputStream(file)
 
         printer.write(data)
@@ -66,7 +70,10 @@ object FileManager {
     }
 
     fun readRawBytes(filename: String): ByteArray? {
-        val file = File(directory, filename)
+        val subfolder = File(directory, subDirectory)
+        if(!subfolder.exists())
+            subfolder.mkdir()
+        val file = File(subfolder, filename)
         if(!file.exists())
             return null
 
