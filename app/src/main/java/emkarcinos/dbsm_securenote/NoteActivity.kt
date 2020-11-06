@@ -1,15 +1,15 @@
 package emkarcinos.dbsm_securenote
 
-import androidx.appcompat.app.AppCompatActivity
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import emkarcinos.dbsm_securenote.R
+import androidx.appcompat.app.AppCompatActivity
 import emkarcinos.dbsm_securenote.backend.Note
 import emkarcinos.dbsm_securenote.backend.User
 
@@ -38,11 +38,26 @@ class NoteActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        //when(item.itemId){
-        //    R.id.changeNotePasswordMenu -> //TODO
-        //}
+        when(item.itemId){
+            R.id.changeNotePasswordMenu -> {
+                val intent = Intent(this, ChangePasswordActivity::class.java)
+                intent.putExtra("user", user)
+                intent.putExtra("note", note)
+                startActivityForResult(intent, 1)
+            }
+        }
         return super.onOptionsItemSelected(item)
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1) {
+            if (resultCode == Activity.RESULT_OK) {
+                secret = data?.getStringExtra("newPassword")!!
+            }
+        }
+    }
+
 
     fun getLoggedUsersNote(){
         val noteBox = findViewById<EditText>(R.id.noteTextBox)
