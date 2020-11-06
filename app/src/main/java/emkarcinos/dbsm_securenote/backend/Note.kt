@@ -9,15 +9,21 @@ class Note(var user: User) {
         loadNote(secret)
     }
 
-    fun saveNote(text: String) {
+    fun saveNote(text: String, secret: String) {
         noteText = text
-        FileManager.saveText(Security.generateHash(user.username), noteText)
+        val cipheredText: ByteArray = Security.encryptString(noteText, secret)
+        FileManager.saveBytes(Security.generateHash(user.username), cipheredText)
     }
 
-    fun loadNote(secret: String) {
-        val text = FileManager.readText(Security.generateHash(user.username))
-        noteText = if(text == null)
-            ""
-        else text
+    private fun loadNote(secret: String) {
+        val fileBytes = FileManager.readRawBytes(Security.generateHash(user.username))
+
+        if(fileBytes == null){
+            noteText = ""
+            return
+        }
+        val decipheredText = Security.decryptToString(fileBytes, secret)
+
+        noteText = decipheredText
     }
 }
