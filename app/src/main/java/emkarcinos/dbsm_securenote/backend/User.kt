@@ -18,8 +18,8 @@ class User : Serializable{
 
     fun changePassword(password: String) {
         passwordHash = Security.generateHash(password)
+        FileManager.updateUser(this)
         //TODO: Update this user's note encryption
-        //TODO: Update user file
     }
 
 }
