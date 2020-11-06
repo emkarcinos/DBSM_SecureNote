@@ -1,8 +1,8 @@
 package emkarcinos.dbsm_securenote.backend
 
-import java.lang.StringBuilder
+import java.io.Serializable
 
-class Note(var user: User) {
+class Note(var user: User) : Serializable {
     lateinit var noteText: String
 
     constructor(user: User, secret: String): this(user){

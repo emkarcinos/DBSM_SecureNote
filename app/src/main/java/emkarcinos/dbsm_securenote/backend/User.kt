@@ -1,6 +1,8 @@
 package emkarcinos.dbsm_securenote.backend
 
-class User {
+import java.io.Serializable
+
+class User : Serializable{
     var username: String
         private set
 
