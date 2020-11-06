@@ -12,4 +12,14 @@ class SecurityTest {
         val resultHash = Security.generateHash(passwordRaw)
         assertEquals(expectedHash, resultHash)
     }
+
+    @Test
+    fun cipherDecipherTest() {
+        val secret = "test"
+        val iv = "brasdas".toByteArray()
+        val message = "sdasda/ntest"
+        val cipher = Security.encryptString(message, secret, iv)
+        val decipher = Security.decryptToString(cipher, secret, iv)
+        assertEquals(decipher, message)
+    }
 }
