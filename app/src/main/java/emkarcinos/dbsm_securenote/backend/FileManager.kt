@@ -28,6 +28,14 @@ object FileManager {
         return true
     }
 
+    fun updateUser(user: User) {
+        val filename = Security.generateHash(user.username)
+
+        val file = File(directory, filename)
+        file.createNewFile()
+        file.writeText(user.passwordHash)
+    }
+
     /**
      * Attempts to load a user from a local storage.
      * @return On success, returns a new User instance.
