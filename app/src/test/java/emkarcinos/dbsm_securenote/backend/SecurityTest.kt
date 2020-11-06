@@ -16,10 +16,9 @@ class SecurityTest {
     @Test
     fun cipherDecipherTest() {
         val secret = "test"
-        val iv = "brasdas".toByteArray()
         val message = "sdasda/ntest"
-        val cipher = Security.encryptString(message, secret, iv)
-        val decipher = Security.decryptToString(cipher, secret, iv)
+        val cipher = Security.encryptString(message, secret)
+        val decipher = Security.decryptToString(cipher, secret)
         assertEquals(decipher, message)
     }
 }
