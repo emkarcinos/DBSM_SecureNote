@@ -5,17 +5,14 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 import java.io.PrintWriter
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.attribute.BasicFileAttributeView
 
 object FileManager {
     lateinit var directory: File
 
     /**
      * Attempts to save new user data to a local storage.
-     * @return true, if the user does not alredy exist;
-     * false, if the user alredy exists.
+     * @return true, if the user does not already exist;
+     * false, if the user already exists.
      */
     fun saveNewUser(user: User): Boolean {
         val filename = Security.generateHash(user.username)
