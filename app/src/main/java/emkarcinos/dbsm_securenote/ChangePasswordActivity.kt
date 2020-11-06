@@ -2,11 +2,11 @@ package emkarcinos.dbsm_securenote
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import emkarcinos.dbsm_securenote.backend.Note
 import emkarcinos.dbsm_securenote.backend.Security
 import emkarcinos.dbsm_securenote.backend.User
@@ -29,8 +29,14 @@ class ChangePasswordActivity : AppCompatActivity() {
         oldPasswordBox = findViewById<EditText>(R.id.oldPasswordBox)
         password1box = findViewById<EditText>(R.id.newPasswordBox1)
         password2box = findViewById<EditText>(R.id.newPasswordBox2)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
+    }
     fun onSubmitBtnClick(v: View) {
         if(changePassword()) {
             onSuccessPassChange()
