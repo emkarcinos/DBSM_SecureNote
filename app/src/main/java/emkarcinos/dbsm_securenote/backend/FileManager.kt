@@ -1,11 +1,9 @@
 package emkarcinos.dbsm_securenote.backend
 
 import android.system.Os
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileReader
-import java.io.PrintWriter
+import java.io.*
 import java.lang.StringBuilder
+import java.nio.file.Files
 
 object FileManager {
     lateinit var directory: File
@@ -59,33 +57,23 @@ object FileManager {
         return Os.lstat(file.absolutePath).st_mtime
     }
 
-    /**
-     * Clears given file's contents, and writes a string into it.
-     */
-    fun saveText(filename: String, string: String) {
+    fun saveBytes(filename: String, data: ByteArray) {
         val file = File(directory, filename)
-        val printer = PrintWriter(file)
-        printer.print(string)
+        val printer = FileOutputStream(file)
+
+        printer.write(data)
         printer.flush()
     }
 
-    /**
-     * Attempts to read a line from a given file.
-     */
-    fun readText(filename: String): String? {
+    fun readRawBytes(filename: String): ByteArray? {
         val file = File(directory, filename)
         if(!file.exists())
             return null
 
-        val reader = BufferedReader(FileReader(file))
-        val strings = reader.readLines()
-
-        val builder = StringBuilder()
-
-        for(text: String in strings)
-            builder.append(text+"\n")
-
-        return builder.substring(0, builder.lastIndex)
+        val stream = FileInputStream(file)
+        val bytes: ByteArray = ByteArray(file.length().toInt())
+        stream.read(bytes)
+        return bytes
     }
 
 }
