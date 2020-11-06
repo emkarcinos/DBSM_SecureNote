@@ -1,4 +1,4 @@
-package emkarcinos.dbsm_securenote.backend
+package emkarcinos.dbsm_securenote
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

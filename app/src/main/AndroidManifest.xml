@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DBSM_SecureNote">
-        <activity android:name=".backend.NoteActivity"></activity>
+        <activity android:name=".NoteActivity"></activity>
         <activity
             android:name=".Register"
             android:parentActivityName=".MainActivity" />

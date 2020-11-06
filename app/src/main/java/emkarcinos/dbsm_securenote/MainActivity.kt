@@ -4,11 +4,9 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import emkarcinos.dbsm_securenote.backend.FileManager
-import emkarcinos.dbsm_securenote.backend.NoteActivity
 import emkarcinos.dbsm_securenote.backend.Security
 import emkarcinos.dbsm_securenote.backend.User
 
