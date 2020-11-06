@@ -2,6 +2,9 @@ package emkarcinos.dbsm_securenote
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
@@ -27,6 +30,18 @@ class NoteActivity : AppCompatActivity() {
         val title = findViewById<TextView>(R.id.noteTitle)
         title.text = username + "'s Note"
         getLoggedUsersNote()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.note_settings, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        //when(item.itemId){
+        //    R.id.changeNotePasswordMenu -> //TODO
+        //}
+        return super.onOptionsItemSelected(item)
     }
 
     fun getLoggedUsersNote(){
