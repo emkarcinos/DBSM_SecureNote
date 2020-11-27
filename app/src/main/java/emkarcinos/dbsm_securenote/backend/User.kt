@@ -36,6 +36,11 @@ class User(username: String, password: String) : Serializable{
     }
 
 
+    /**
+     * Changes users password.
+     * Updates hash.
+     * @param password: Plaintext password
+     */
     fun changePassword(password: String) {
         this.password = password
         passwordHash = Security.generateHash(password + salt)
