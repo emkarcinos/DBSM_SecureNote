@@ -55,4 +55,18 @@ object UserManager {
 
         return true
     }
+
+    /**
+     * Gets the user's note.
+     * If the note exists, and the user was validated, it will also update given user's note field.
+     * @param user: User object to find a note for
+     * @return If the note isn't found, or the user wasn't validated, returns null. Otherwise returns
+     * Note object.
+     */
+    fun getUsersNote(user: User): Note? {
+        return when (user.password.length) {
+            0 -> null
+            else -> FileManager.readNote(user)
+        }
+    }
 }
