@@ -116,15 +116,13 @@ object FileManager {
         if(!isInit)
             throw ExceptionInInitializerError()
 
-        // TODO
-        val filename: String? = null
-        val data = null
+        val filename: String = Security.generateHash(note.user.username)
         try {
             val file = File(noteSubdirectory, filename)
             val printer = FileOutputStream(file)
-
+            val data = Security.encryptString(note.noteText, note.user.password)
             printer.write(data)
-            printer.flush()
+            printer.close()
         } catch (e: IOException){
             e.printStackTrace()
         }
@@ -139,16 +137,26 @@ object FileManager {
         if(!isInit)
             throw ExceptionInInitializerError()
 
-        // TODO
-        val filename = ""
-        val file = File(noteSubdirectory, filename)
-        if(!file.exists())
-            return null
+        val filename = Security.generateHash(user.username)
 
-        val stream = FileInputStream(file)
-        val bytes: ByteArray = ByteArray(file.length().toInt())
-        stream.read(bytes)
-        return null
+        var note: Note? = null
+        try {
+            val file = File(noteSubdirectory, filename)
+            if(!file.exists())
+                return null
+
+            val stream = FileInputStream(file)
+            val bytes = ByteArray(file.length().toInt())
+            stream.read(bytes)
+            stream.close()
+
+            val decryptedText = Security.decryptToString(bytes, user.password)
+            note = Note(decryptedText, user)
+        } catch (e: IOException){
+            e.printStackTrace()
+        }
+
+        return note
     }
 
 }
