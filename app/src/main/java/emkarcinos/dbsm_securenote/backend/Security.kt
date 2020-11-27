@@ -20,7 +20,7 @@ object Security {
 
     fun generatePBKDF(password: String, salt: String): String {
         val keyFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
-        val keySpec = PBEKeySpec(password.toCharArray(), salt.toByteArray(), 10000, 256)
+        val keySpec = PBEKeySpec(password.toCharArray(), salt.toByteArray(), 10000, hashSize * 8)
         val key = keyFac.generateSecret(keySpec)
         return key.encoded.toHex()
     }
