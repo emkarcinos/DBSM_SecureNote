@@ -1,94 +1,145 @@
 package emkarcinos.dbsm_securenote.backend
 
-import android.system.Os
 import java.io.*
-import java.lang.StringBuilder
-import java.nio.file.Files
 
 object FileManager {
-    lateinit var directory: File
+    // File pointing to the main data folder
+    lateinit var appDirectory: File
 
-    private val subDirectory: String = "files"
+    // Subdirectory name containing encrypted notes
+    private const val notesFolderName: String = "notes"
+    // Subdirectory name with user data
+    private const val userdataFolderName: String = "users"
+
+    // Pointers to subdirectories
+    private lateinit var noteSubdirectory: File
+    private lateinit var usersSubdirectory: File
+
+    private var isInit = false
+
     /**
-     * Attempts to save new user data to a local storage.
-     * @return true, if the user does not already exist;
-     * false, if the user already exists.
+     * Initializes the manager in a given directory
+     * @param directory: Directory file
      */
-    fun saveNewUser(user: User): Boolean {
-        val filename = Security.generateHash(user.username)
+    fun init(directory: File){
+        if(!isInit){
+            this.appDirectory = directory
+            this.noteSubdirectory = File(directory, notesFolderName)
+            this.usersSubdirectory = File(directory, userdataFolderName)
 
-        val file = File(directory, filename)
-        if(!file.createNewFile()){
-            // File exists
-            return false
-        } else {
-            file.writeText(user.passwordHash)
-        }
+            when {
+                !usersSubdirectory.exists() -> usersSubdirectory.mkdir()
+                !noteSubdirectory.exists() -> noteSubdirectory.mkdir()
+            }
 
-        return true
+            isInit = true
+        } else
+            System.out.println("Alredy initialized!")
     }
 
-    fun updateUser(user: User) {
+    /**
+     * Check whether given user's file exists.
+     */
+    fun userFileExists(user: User): Boolean {
+        val filename = Security.generateHash(user.username)
+        val file = File(usersSubdirectory, filename)
+        return file.exists()
+    }
+
+    /**
+     * Attempts to save user data to a file.
+     * A new file is written for each user named by a hash of given username.
+     * The file is then filled with hashed password and salt value.
+     * If user's file already exists, it's contents will be overwritten.
+     */
+    fun saveUserData(user: User) {
+        if(!isInit)
+            throw ExceptionInInitializerError()
+
         val filename = Security.generateHash(user.username)
 
-        val file = File(directory, filename)
-        file.createNewFile()
-        file.writeText(user.passwordHash)
+        try {
+            val file = File(usersSubdirectory, filename)
+
+            if(!userFileExists(user))
+                file.createNewFile()
+
+            // TODO: Use hashing with salt
+            file.writeText(user.passwordHash)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 
     /**
      * Attempts to load a user from a local storage.
      * @return On success, returns a new User instance.
-     * If the user dosen't exist, returns null.
+     * If the user doesn't exist, returns null.
      */
     fun grabUser(username: String): User? {
-        val filename = Security.generateHash(username)
-        val file = File(directory, filename)
-        if(!file.exists())
-            return null
-        val reader = BufferedReader(FileReader(file))
-        val passwordHash = reader.readLine()
+        if(!isInit)
+            throw ExceptionInInitializerError()
 
-        var user = User(username, "")
-        user.passwordHash = passwordHash
+        var user: User? = null
+        val filename = Security.generateHash(username)
+        try {
+            val file = File(usersSubdirectory, filename)
+            if(!file.exists())
+                return null
+
+            val reader = BufferedReader(FileReader(file))
+            // TODO: This needs to support salting as well
+            val passwordHash = reader.readLine()
+
+            user = User(username, "")
+            user.passwordHash = passwordHash
+            return user
+        } catch (e: IOException){
+            e.printStackTrace()
+        }
         return user
     }
 
     /**
-     * Gets file's last modification date.
-     * @return Date as a long integer, or null if the file wasn't found.
+     * Attempts to securely save a note.
      */
-    fun getFileModificationDate(filename: String): Long? {
-        val file = File(directory, filename)
-        if(!file.exists())
-            return null
+    fun saveNote(note: Note) {
+        if(!isInit)
+            throw ExceptionInInitializerError()
 
-        return Os.lstat(file.absolutePath).st_mtime
+        // TODO
+        val filename: String? = null
+        val data = null
+        try {
+            val file = File(noteSubdirectory, filename)
+            val printer = FileOutputStream(file)
+
+            printer.write(data)
+            printer.flush()
+        } catch (e: IOException){
+            e.printStackTrace()
+        }
     }
 
-    fun saveBytes(filename: String, data: ByteArray) {
-        val subfolder = File(directory, subDirectory)
-        if(!subfolder.exists())
-            subfolder.mkdir()
-        val file = File(subfolder, filename)
-        val printer = FileOutputStream(file)
+    /**
+     * Attempts to read an encrypted note.
+     * @param user: An user object to load the note for
+     * @return: On success, return a new note object. Otherwise null
+     */
+    fun readNote(user: User): Note? {
+        if(!isInit)
+            throw ExceptionInInitializerError()
 
-        printer.write(data)
-        printer.flush()
-    }
-
-    fun readRawBytes(filename: String): ByteArray? {
-        val subfolder = File(directory, subDirectory)
-        if(!subfolder.exists())
-            subfolder.mkdir()
-        val file = File(subfolder, filename)
+        // TODO
+        val filename = ""
+        val file = File(noteSubdirectory, filename)
         if(!file.exists())
             return null
 
         val stream = FileInputStream(file)
         val bytes: ByteArray = ByteArray(file.length().toInt())
         stream.read(bytes)
-        return bytes
+        return null
     }
 
 }
