@@ -69,4 +69,19 @@ object UserManager {
             else -> FileManager.readNote(user)
         }
     }
+
+    /**
+     * Creates a new note for the specified user.
+     * If the note already exists, it won't be created.
+     * @param user: User object to create a note for
+     * @return Null, if the note already exists, otherwise returns a new note object
+     */
+    fun createNote(user: User): Note? {
+        val note = Note("", user)
+        when {
+            FileManager.noteExists(note) -> return null
+            else -> FileManager.saveNote(note)
+        }
+        return note
+    }
 }
