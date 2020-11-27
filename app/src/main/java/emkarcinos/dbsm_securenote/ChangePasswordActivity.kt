@@ -10,6 +10,11 @@ import androidx.appcompat.app.AppCompatActivity
 import emkarcinos.dbsm_securenote.backend.*
 
 class ChangePasswordActivity : AppCompatActivity() {
+
+    // Timeout between consecutive login attempts
+    private val loginTimeout = 1000L
+    private var lastButtonClickTime = 0L
+
     private lateinit var oldPasswordBox: EditText
     private lateinit var password1box: EditText
     private lateinit var password2box: EditText
@@ -29,6 +34,8 @@ class ChangePasswordActivity : AppCompatActivity() {
         password2box = findViewById(R.id.newPasswordBox2)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        lastButtonClickTime = System.currentTimeMillis()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -36,6 +43,10 @@ class ChangePasswordActivity : AppCompatActivity() {
         return true
     }
     fun onSubmitBtnClick(v: View) {
+        if(System.currentTimeMillis() - lastButtonClickTime < loginTimeout)
+            return
+
+        lastButtonClickTime = System.currentTimeMillis()
         if(changePassword()) {
             onSuccessPassChange()
         }

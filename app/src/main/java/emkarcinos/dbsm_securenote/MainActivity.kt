@@ -11,6 +11,9 @@ import emkarcinos.dbsm_securenote.backend.User
 import emkarcinos.dbsm_securenote.backend.UserManager
 
 class MainActivity : AppCompatActivity() {
+    // Timeout between consecutive login attempts
+    private val loginTimeout = 1000L
+    private var lastButtonClickTime = 0L
     private lateinit var usernameBox: EditText
     private lateinit var passwordBox: EditText
 
@@ -21,6 +24,8 @@ class MainActivity : AppCompatActivity() {
         passwordBox = findViewById(R.id.passwordInputBox)
         // FileManager setup
         FileManager.init(applicationContext.filesDir)
+
+        lastButtonClickTime = System.currentTimeMillis()
     }
 
     fun switchToRegisterPage(v: View) {
@@ -29,7 +34,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun loginButtonClick(v: View){
+        if(System.currentTimeMillis() - lastButtonClickTime < loginTimeout)
+            return
         val user = authenticate()
+        lastButtonClickTime = System.currentTimeMillis()
         if(user != null){
             Toast.makeText(this,"Successfully authenticated.", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, NoteActivity::class.java)
