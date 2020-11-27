@@ -110,6 +110,16 @@ object FileManager {
     }
 
     /**
+     * Checks if the note already exists.
+     * @return true, if exists. Otherwise false
+     */
+    fun noteExists(note: Note): Boolean {
+        val filename = Security.generateHash(note.user.username)
+        val file = File(noteSubdirectory, filename)
+        return file.exists()
+    }
+
+    /**
      * Attempts to securely save a note.
      */
     fun saveNote(note: Note) {
@@ -119,6 +129,10 @@ object FileManager {
         val filename: String = Security.generateHash(note.user.username)
         try {
             val file = File(noteSubdirectory, filename)
+
+            if (!noteExists(note))
+                file.createNewFile()
+
             val printer = FileOutputStream(file)
             val data = Security.encryptString(note.noteText, note.user.password)
             printer.write(data)
