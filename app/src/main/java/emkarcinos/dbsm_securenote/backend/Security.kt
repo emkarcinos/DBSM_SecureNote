@@ -1,6 +1,5 @@
 package emkarcinos.dbsm_securenote.backend
 
-import android.R.attr
 import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.crypto.Cipher
@@ -27,63 +26,84 @@ object Security {
         return hasher.digest(bytes)
     }
 
+    /**
+     * Encrypts the string data using AES/CBC method.
+     * The IV is generated randomly and encrypted together with the data.
+     * @param lines: input data
+     * @param key: key as a string
+     * @return ByteArray with IV and encrypted data.
+     */
     fun encryptString(lines: String, key: String): ByteArray{
-        val clean: ByteArray = lines.toByteArray()
+        val dataBytes: ByteArray = lines.toByteArray()
+        // Used to cipher the data
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        // Used to cipher IV
+        // ECB is safe here - we will encrypt only one block of data
+        val cipherECB = Cipher.getInstance("AES/ECB/NoPadding")
 
-        // Generating IV.
-        val ivSize = 16
-        val iv = ByteArray(ivSize)
+        val iv = ByteArray(cipher.blockSize)
         val random = SecureRandom()
         random.nextBytes(iv)
         val ivParameterSpec = IvParameterSpec(iv)
 
-        // Hashing key.
         var keyBytes = generateHashBytes(key)
-        //trimming
-        keyBytes = keyBytes.copyOf(16)
+        // trimming
+        keyBytes = keyBytes.copyOf(cipher.blockSize)
 
         val secretKeySpec = SecretKeySpec(keyBytes, "AES")
 
-        // Encrypt.
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        // Encrypt note
         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec)
-        val encrypted = cipher.doFinal(clean)
+        val encryptedData = cipher.doFinal(dataBytes)
 
-        // Combine IV and encrypted part.
-        val encryptedIVAndText = ByteArray(ivSize + encrypted.size)
-        System.arraycopy(iv, 0, encryptedIVAndText, 0, ivSize)
-        System.arraycopy(encrypted, 0, encryptedIVAndText, ivSize, encrypted.size)
+        // Encrypt IV
+        cipherECB.init(Cipher.ENCRYPT_MODE, secretKeySpec)
+        val encryptedIv = cipherECB.doFinal(iv)
 
-        return encryptedIVAndText
+        val finalData = ByteArray(encryptedIv.size + encryptedData.size)
+        System.arraycopy(encryptedIv, 0, finalData, 0, encryptedIv.size)
+        System.arraycopy(encryptedData, 0, finalData, encryptedIv.size, encryptedData.size)
+
+        return finalData
     }
 
+    /**
+     * Attempts to decrypt the data.
+     * Data decryption may not be successful - if the keys don't match this may throw an exception,
+     * or deciphered data will be wrong.
+     *
+     * Reverse method to encryptString.
+     * @param bytes: data to decrypt
+     * @param key: key as a string
+     * @return String with deciphered text
+     */
     fun decryptToString(bytes: ByteArray, key: String): String {
-        val ivSize = 16
-        val keySize = 16
+        // Used to decipher the data
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        // Used to decipher IV
+        val cipherECB = Cipher.getInstance("AES/ECB/NoPadding")
 
-        // Extract IV.
-        val iv = ByteArray(ivSize)
+        val iv = ByteArray(cipher.blockSize)
         System.arraycopy(bytes, 0, iv, 0, iv.size)
-        val ivParameterSpec = IvParameterSpec(iv)
 
-        // Extract encrypted part.
-        val encryptedSize: Int = bytes.size - ivSize
-        val encryptedBytes = ByteArray(encryptedSize)
-        System.arraycopy(bytes, ivSize, encryptedBytes, 0, encryptedSize)
+        val encryptedBytes = ByteArray(bytes.size - iv.size)
+        System.arraycopy(bytes, iv.size, encryptedBytes, 0, encryptedBytes.size)
 
-        // Hash key.
-        // Hashing key.
         var keyBytes = generateHashBytes(key)
-        //trimming
-        keyBytes = keyBytes.copyOf(16)
+        // trimming
+        keyBytes = keyBytes.copyOf(cipher.blockSize)
 
         val secretKeySpec = SecretKeySpec(keyBytes, "AES")
 
-        // Decrypt.
-        val cipherDecrypt = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        cipherDecrypt.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec)
-        val decrypted = cipherDecrypt.doFinal(encryptedBytes)
+        // Decrypt IV
+        cipherECB.init(Cipher.DECRYPT_MODE, secretKeySpec)
+        val decryptedIv: ByteArray = cipherECB.doFinal(iv)
 
-        return String(decrypted)
+        val ivParameterSpec = IvParameterSpec(decryptedIv)
+
+        // Decrypt data
+        cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec)
+        val decryptedData: ByteArray = cipher.doFinal(encryptedBytes)
+        return String(decryptedData)
     }
 }
