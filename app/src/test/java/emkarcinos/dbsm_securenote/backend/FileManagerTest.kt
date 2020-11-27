@@ -31,11 +31,13 @@ class FileManagerTest {
     }
 
     @Test
-    fun writeBytesReadBytesIdentityTest(){
-        val placeholderData = "test".toByteArray()
-        //FileManager.saveBytes("test", placeholderData)
-        //val readData = FileManager.readRawBytes("test")
-        //assertArrayEquals(placeholderData, readData)
+    fun noteSaveLoadTest(){
+        val user = User("user", "pass")
+        val note = Note("text", user)
+        user.note = note
+        FileManager.saveNote(note)
+        val loadedNote = FileManager.readNote(user)
+        assertEquals(note.noteText, loadedNote?.noteText)
     }
 
     @Test
