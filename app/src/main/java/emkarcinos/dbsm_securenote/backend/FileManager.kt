@@ -66,7 +66,7 @@ object FileManager {
 
             val writer = file.bufferedWriter()
             writer.write(user.passwordHash + user.salt)
-            writer.flush()
+            writer.close()
 
         } catch (e: IOException) {
             e.printStackTrace()
