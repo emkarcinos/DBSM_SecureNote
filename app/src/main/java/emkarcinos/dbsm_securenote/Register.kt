@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.Toast
 import emkarcinos.dbsm_securenote.backend.FileManager
 import emkarcinos.dbsm_securenote.backend.User
+import emkarcinos.dbsm_securenote.backend.UserManager
 
 class Register : AppCompatActivity() {
     private lateinit var usernameBox: EditText
@@ -18,13 +19,13 @@ class Register : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
-        usernameBox = findViewById<EditText>(R.id.newUsernameInputBox)
-        password1box = findViewById<EditText>(R.id.newPasswordInputBox)
-        password2box = findViewById<EditText>(R.id.retypePasswordTextBox)
+        usernameBox = findViewById(R.id.newUsernameInputBox)
+        password1box = findViewById(R.id.newPasswordInputBox)
+        password2box = findViewById(R.id.retypePasswordTextBox)
     }
 
     fun submitButtonClick(v: View){
-        if(createUser(v))
+        if(createUser())
             onSuccessUserCreate()
     }
 
@@ -34,7 +35,7 @@ class Register : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun createUser(v: View): Boolean {
+    private fun createUser(): Boolean {
         val username = usernameBox.editableText.toString().trim()
 
         val password1 = password1box.editableText.toString().trim()
@@ -66,12 +67,12 @@ class Register : AppCompatActivity() {
             return false
         }
 
-        val user = User(username, password2)
+        val user = UserManager.createNewUser(username, password2)
 
-        if(!FileManager.saveNewUser(user)){
+        if(user == null){
             usernameBox.error = "This user alredy exists."
             return false
-        }
+          }
 
         return true
 
