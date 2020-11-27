@@ -11,11 +11,11 @@ object UserManager {
      */
     fun createNewUser(username: String, password: String): User?{
         val newUser = User(username,password)
-        when {
-            FileManager.userFileExists(newUser) -> return newUser
-            else -> FileManager.saveUserData(newUser)
-        }
-        return null
+        if (FileManager.userFileExists(newUser))
+            return null
+
+        FileManager.saveUserData(newUser)
+        return newUser
     }
 
     /**
