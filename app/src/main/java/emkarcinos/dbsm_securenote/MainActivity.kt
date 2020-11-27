@@ -7,8 +7,8 @@ import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import emkarcinos.dbsm_securenote.backend.FileManager
-import emkarcinos.dbsm_securenote.backend.Security
 import emkarcinos.dbsm_securenote.backend.User
+import emkarcinos.dbsm_securenote.backend.UserManager
 
 class MainActivity : AppCompatActivity() {
     private lateinit var usernameBox: EditText
@@ -61,15 +61,14 @@ class MainActivity : AppCompatActivity() {
             return null
         }
 
-        val passwordHash = Security.generateHash(password)
-        val user = FileManager.grabUser(username)
+        val user = UserManager.getUserByName(username)
 
         if(user == null){
             usernameBox.error = "This user does not exist."
             return null
         }
 
-        if(passwordHash != user.passwordHash){
+        if(UserManager.validateCredentials(user, password)){
             passwordBox.editableText.clear()
             passwordBox.error = "Invalid password."
             return null
