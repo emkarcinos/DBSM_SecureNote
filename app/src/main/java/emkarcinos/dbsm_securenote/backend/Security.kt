@@ -31,18 +31,17 @@ object Security {
      *
      * The salt is generated in a following way:
      * A new array of bytes is created and filled with random values.
-     * Then, this array is hashed with SHA-256.
+     * Then, this array is encoded to hex values.
      *
-     * @return ByteArray with salt data.
+     * @return Salt as a string.
      */
-    fun generateSalt(): ByteArray {
-        val hasher = MessageDigest.getInstance("SHA-256")
-        val randomBytes = ByteArray(hasher.digestLength)
+    fun generateSalt(): String {
+        val randomBytes = ByteArray(8)
 
         val random = SecureRandom()
         random.nextBytes(randomBytes)
 
-        return hasher.digest(randomBytes)
+        return randomBytes.toHex()
     }
 
     /**
