@@ -27,6 +27,25 @@ object Security {
     }
 
     /**
+     * Generates random salt value.
+     *
+     * The salt is generated in a following way:
+     * A new array of bytes is created and filled with random values.
+     * Then, this array is hashed with SHA-256.
+     *
+     * @return ByteArray with salt data.
+     */
+    fun generateSalt(): ByteArray {
+        val hasher = MessageDigest.getInstance("SHA-256")
+        val randomBytes = ByteArray(hasher.digestLength)
+
+        val random = SecureRandom()
+        random.nextBytes(randomBytes)
+
+        return hasher.digest(randomBytes)
+    }
+
+    /**
      * Encrypts the string data using AES/CBC method.
      * The IV is generated randomly and encrypted together with the data.
      * @param lines: input data
