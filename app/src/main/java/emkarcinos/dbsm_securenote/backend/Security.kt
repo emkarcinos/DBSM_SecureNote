@@ -3,7 +3,9 @@ package emkarcinos.dbsm_securenote.backend
 import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.crypto.Cipher
+import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 
 
@@ -14,6 +16,13 @@ object Security {
 
     private fun ByteArray.toHex(): String {
         return joinToString("") { "%02x".format(it) }
+    }
+
+    fun generatePBKDF(password: String, salt: String): String {
+        val keyFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+        val keySpec = PBEKeySpec(password.toCharArray(), salt.toByteArray(), 10000, 256)
+        val key = keyFac.generateSecret(keySpec)
+        return key.encoded.toHex()
     }
 
     fun generateHash(message: String): String {
