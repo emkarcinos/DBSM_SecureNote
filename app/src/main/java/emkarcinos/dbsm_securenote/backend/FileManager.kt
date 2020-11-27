@@ -1,6 +1,7 @@
 package emkarcinos.dbsm_securenote.backend
 
 import java.io.*
+import java.security.MessageDigest
 
 object FileManager {
     // File pointing to the main data folder
@@ -64,8 +65,8 @@ object FileManager {
             if(!userFileExists(user))
                 file.createNewFile()
 
-            // TODO: Use hashing with salt
             file.writeText(user.passwordHash)
+            file.writeText(user.salt)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -73,6 +74,7 @@ object FileManager {
 
     /**
      * Attempts to load a user from a local storage.
+     * @param username: Username as string
      * @return On success, returns a new User instance.
      * If the user doesn't exist, returns null.
      */
@@ -82,21 +84,26 @@ object FileManager {
 
         var user: User? = null
         val filename = Security.generateHash(username)
+
         try {
             val file = File(usersSubdirectory, filename)
             if(!file.exists())
                 return null
 
-            val reader = BufferedReader(FileReader(file))
-            // TODO: This needs to support salting as well
-            val passwordHash = reader.readLine()
+            val fileBytes = file.readBytes()
 
-            user = User(username, "")
-            user.passwordHash = passwordHash
-            return user
+            val passwordHash = ByteArray(Security.hashSize)
+            val salt = ByteArray(Security.saltSize)
+
+            System.arraycopy(fileBytes, 0, passwordHash, 0, passwordHash.size)
+            System.arraycopy(fileBytes, passwordHash.size, salt, 0, salt.size)
+
+            user = User(username, String(passwordHash), String(salt))
+
         } catch (e: IOException){
             e.printStackTrace()
         }
+
         return user
     }
 
