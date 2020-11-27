@@ -33,8 +33,7 @@ class MainActivity : AppCompatActivity() {
         if(user != null){
             Toast.makeText(this,"Successfully authenticated.", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, NoteActivity::class.java)
-            intent.putExtra("username", user.username)
-            intent.putExtra("password", passwordBox.editableText.toString().trim())
+            intent.putExtra("user", user)
             startActivity(intent)
             clearTextBoxes()
         }
@@ -68,7 +67,7 @@ class MainActivity : AppCompatActivity() {
             return null
         }
 
-        if(UserManager.validateCredentials(user, password)){
+        if(!UserManager.validateCredentials(user, password)){
             passwordBox.editableText.clear()
             passwordBox.error = "Invalid password."
             return null
