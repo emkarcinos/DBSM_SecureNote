@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DBSM_SecureNote</string>
+    <string name="app_name">Secure Note</string>
     <string name="username_input_text">Username</string>
     <string name="password_input_text">Password</string>
     <string name="login_button">Log in</string>
