@@ -2,4 +2,4 @@ package emkarcinos.dbsm_securenote.backend
 
 import java.io.Serializable
 
-class Note(private val noteText: String, private val user: User) : Serializable
+class Note(val noteText: String, val user: User) : Serializable
