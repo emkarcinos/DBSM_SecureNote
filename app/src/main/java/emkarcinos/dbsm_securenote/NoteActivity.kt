@@ -10,25 +10,25 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import emkarcinos.dbsm_securenote.backend.FileManager
 import emkarcinos.dbsm_securenote.backend.Note
 import emkarcinos.dbsm_securenote.backend.User
+import emkarcinos.dbsm_securenote.backend.UserManager
+import java.lang.Exception
 
 class NoteActivity : AppCompatActivity() {
     private lateinit var user: User
-    private lateinit var secret: String
     private lateinit var note: Note
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_note)
 
-        val username = intent.getStringExtra("username")!!
-        secret = intent.getStringExtra("password")!!
-
-        user = User(username, secret)
+        user = intent.getSerializableExtra("user") as User
 
         val title = findViewById<TextView>(R.id.noteTitle)
-        title.text = username + "'s Note"
+        title.text = user.username + "'s Note"
+
         getLoggedUsersNote()
     }
 
@@ -49,27 +49,36 @@ class NoteActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1) {
-            if (resultCode == Activity.RESULT_OK) {
-                secret = data?.getStringExtra("newPassword")!!
-            }
-        }
-    }
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        if (requestCode == 1) {
+//            if (resultCode == Activity.RESULT_OK) {
+//                secret = data?.getStringExtra("newPassword")!!
+//            }
+//        }
+//    }
 
 
-    fun getLoggedUsersNote(){
+    private fun getLoggedUsersNote(){
         val noteBox = findViewById<EditText>(R.id.noteTextBox)
 
-        note = Note(user, secret)
+        val loadedNote = UserManager.getUsersNote(user)
+        if(loadedNote == null) {
+            // If the note doesn't exist, create a blank one
+            when (val newNote = UserManager.createNote(user)) {
+                null -> throw Exception()
+                else -> note = newNote
+            }
+        } else
+            note = loadedNote
         noteBox.setText(note.noteText)
     }
 
     fun onSaveButton(v: View) {
         val grabbedText = findViewById<EditText>(R.id.noteTextBox).editableText.toString().trim()
 
-        note.saveNote(grabbedText, secret)
+        note.noteText = grabbedText
+        FileManager.saveNote(note)
         Toast.makeText(this, "Successfully saved and secured!", Toast.LENGTH_SHORT).show()
     }
 }
