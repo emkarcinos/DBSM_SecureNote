@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         usernameBox = findViewById(R.id.usernameInputBox)
         passwordBox = findViewById(R.id.passwordInputBox)
         // FileManager setup
-        FileManager.directory = applicationContext.filesDir
+        FileManager.init(applicationContext.filesDir)
     }
 
     fun switchToRegisterPage(v: View) {
@@ -29,10 +29,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun loginButtonClick(v: View){
-        val user = authenticate(v)
+        val user = authenticate()
         if(user != null){
             Toast.makeText(this,"Successfully authenticated.", Toast.LENGTH_SHORT).show()
-            var intent = Intent(this, NoteActivity::class.java)
+            val intent = Intent(this, NoteActivity::class.java)
             intent.putExtra("username", user.username)
             intent.putExtra("password", passwordBox.editableText.toString().trim())
             startActivity(intent)
@@ -40,12 +40,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun clearTextBoxes(){
+    private fun clearTextBoxes(){
         usernameBox.editableText.clear()
         passwordBox.editableText.clear()
     }
 
-    fun authenticate(v: View): User?{
+    private fun authenticate(): User?{
         usernameBox.error = null
         passwordBox.error = null
 
