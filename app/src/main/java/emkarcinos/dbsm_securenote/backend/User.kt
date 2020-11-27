@@ -2,24 +2,43 @@ package emkarcinos.dbsm_securenote.backend
 
 import java.io.Serializable
 
-class User : Serializable{
-    var username: String
-        private set
+class User(username: String, password: String) : Serializable{
+    var username: String = username
+    var password: String = password
 
+    // Salted password (salt is postfix)
     var passwordHash: String
+    var salt: String
 
     var note: Note? = null
 
-    constructor(username: String, password: String) {
-        this.username = username
-        this.passwordHash = Security.generateHash(password)
-        //TODO: Save user info to a file
+    /**
+     * Creates a new user.
+     * @param username: User name as string
+     * @param password: Plaintext password
+     */
+    init {
+        this.salt = Security.generateSalt()
+        this.passwordHash = Security.generateHash(password + salt)
     }
 
+    /**
+     * Creates a new user instance from already existing user in the database.
+     *
+     * This user isn't validated yet - its password is set empty
+     * @param username: User name as string
+     * @param passwordHash: Hashed and salted password as string
+     * @param salt: Salt as string
+     */
+    constructor(username: String, passwordHash: String, salt: String) : this(username, "") {
+        this.passwordHash = passwordHash
+        this.salt = salt
+    }
+
+
     fun changePassword(password: String) {
-        passwordHash = Security.generateHash(password)
-        FileManager.updateUser(this)
-        //TODO: Update this user's note encryption
+        this.password = password
+        passwordHash = Security.generateHash(password + salt)
     }
 
 }
