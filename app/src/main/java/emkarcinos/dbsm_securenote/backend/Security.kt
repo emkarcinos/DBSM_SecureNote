@@ -8,6 +8,9 @@ import javax.crypto.spec.SecretKeySpec
 
 
 object Security {
+    const val hashAlgorithm = "SHA-256"
+    val hashSize = MessageDigest.getInstance(hashAlgorithm).digestLength
+    const val saltSize = 8
 
     private fun ByteArray.toHex(): String {
         return joinToString("") { "%02x".format(it) }
@@ -15,14 +18,14 @@ object Security {
 
     fun generateHash(message: String): String {
         val bytes = message.toByteArray()
-        val hasher = MessageDigest.getInstance("SHA-256")
+        val hasher = MessageDigest.getInstance(hashAlgorithm)
         val digested = hasher.digest(bytes)
         return digested.toHex()
     }
 
     fun generateHashBytes(message: String): ByteArray {
         val bytes = message.toByteArray() 
-        val hasher = MessageDigest.getInstance("SHA-256")
+        val hasher = MessageDigest.getInstance(hashAlgorithm)
         return hasher.digest(bytes)
     }
 
@@ -36,7 +39,7 @@ object Security {
      * @return Salt as a string.
      */
     fun generateSalt(): String {
-        val randomBytes = ByteArray(8)
+        val randomBytes = ByteArray(saltSize)
 
         val random = SecureRandom()
         random.nextBytes(randomBytes)
