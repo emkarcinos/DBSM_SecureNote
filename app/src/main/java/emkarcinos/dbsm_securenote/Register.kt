@@ -70,7 +70,7 @@ class Register : AppCompatActivity() {
         val user = UserManager.createNewUser(username, password2)
 
         if(user == null){
-            usernameBox.error = "This user alredy exists."
+            usernameBox.error = "This user already exists."
             return false
           }
 
