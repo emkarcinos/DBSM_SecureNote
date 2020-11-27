@@ -7,9 +7,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import emkarcinos.dbsm_securenote.backend.Note
-import emkarcinos.dbsm_securenote.backend.Security
-import emkarcinos.dbsm_securenote.backend.User
+import emkarcinos.dbsm_securenote.backend.*
 
 class ChangePasswordActivity : AppCompatActivity() {
     private lateinit var oldPasswordBox: EditText
@@ -26,9 +24,9 @@ class ChangePasswordActivity : AppCompatActivity() {
         note = intent.getSerializableExtra("note") as Note
         user = intent.getSerializableExtra("user") as User
 
-        oldPasswordBox = findViewById<EditText>(R.id.oldPasswordBox)
-        password1box = findViewById<EditText>(R.id.newPasswordBox1)
-        password2box = findViewById<EditText>(R.id.newPasswordBox2)
+        oldPasswordBox = findViewById(R.id.oldPasswordBox)
+        password1box = findViewById(R.id.newPasswordBox1)
+        password2box = findViewById(R.id.newPasswordBox2)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
@@ -46,7 +44,7 @@ class ChangePasswordActivity : AppCompatActivity() {
     private fun onSuccessPassChange() {
         Toast.makeText(this, "Password changed.", Toast.LENGTH_SHORT).show()
         val intent = Intent(this, NoteActivity::class.java)
-        intent.putExtra("newPassword", password2box.editableText.toString().trim())
+        intent.putExtra("modifiedUser", user)
         setResult(Activity.RESULT_OK, intent)
         finish()
     }
@@ -83,14 +81,12 @@ class ChangePasswordActivity : AppCompatActivity() {
             return false
         }
 
-        val oldPassHash = Security.generateHash(oldPass)
-        if(oldPassHash != user.passwordHash){
+        if(!UserManager.validateCredentials(user, oldPass)){
             oldPasswordBox.error = "Wrong password."
             return false
         }
 
-        user.changePassword(password2)
-        note.saveNote(note.noteText, password2)
+        UserManager.updateUserPassword(user, password2)
         return true
 
     }
