@@ -28,10 +28,9 @@ object FileManager {
             this.noteSubdirectory = File(directory, notesFolderName)
             this.usersSubdirectory = File(directory, userdataFolderName)
 
-            when {
-                !usersSubdirectory.exists() -> usersSubdirectory.mkdir()
-                !noteSubdirectory.exists() -> noteSubdirectory.mkdir()
-            }
+            when {!usersSubdirectory.exists() -> usersSubdirectory.mkdir()}
+            when {!noteSubdirectory.exists() -> noteSubdirectory.mkdir()}
+
 
             isInit = true
         } else
@@ -65,8 +64,10 @@ object FileManager {
             if(!userFileExists(user))
                 file.createNewFile()
 
-            file.writeText(user.passwordHash)
-            file.writeText(user.salt)
+            val writer = file.bufferedWriter()
+            writer.write(user.passwordHash + user.salt)
+            writer.flush()
+
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -92,8 +93,9 @@ object FileManager {
 
             val fileBytes = file.readBytes()
 
-            val passwordHash = ByteArray(Security.hashSize)
-            val salt = ByteArray(Security.saltSize)
+            // Sizes are multiplied by 2, because they've been written as hex
+            val passwordHash = ByteArray(Security.hashSize * 2)
+            val salt = ByteArray(Security.saltSize * 2)
 
             System.arraycopy(fileBytes, 0, passwordHash, 0, passwordHash.size)
             System.arraycopy(fileBytes, passwordHash.size, salt, 0, salt.size)
