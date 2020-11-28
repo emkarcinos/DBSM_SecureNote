@@ -10,6 +10,7 @@ import android.widget.Toast
 import emkarcinos.dbsm_securenote.backend.FileManager
 import emkarcinos.dbsm_securenote.backend.User
 import emkarcinos.dbsm_securenote.backend.UserManager
+import java.util.regex.Pattern
 
 class Register : AppCompatActivity() {
     private lateinit var usernameBox: EditText
@@ -64,6 +65,15 @@ class Register : AppCompatActivity() {
         //Check if two passwords are equal
         if(password1 != password2){
             password2box.setError("Passwords do not match.")
+            return false
+        }
+
+        // Check if a password matches regex
+        val pattern = Pattern.compile("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$")
+        val isStrong = pattern.matcher(password2).matches()
+
+        if(!isStrong) {
+            password1box.error = "Password too weak."
             return false
         }
 
