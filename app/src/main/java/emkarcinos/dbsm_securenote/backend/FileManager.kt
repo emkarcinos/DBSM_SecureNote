@@ -1,7 +1,6 @@
 package emkarcinos.dbsm_securenote.backend
 
 import java.io.*
-import java.security.MessageDigest
 
 object FileManager {
     // File pointing to the main data folder
@@ -134,7 +133,7 @@ object FileManager {
                 file.createNewFile()
 
             val printer = FileOutputStream(file)
-            val data = Security.encryptString(note.noteText, note.user.password)
+            val data = Security.encryptString(note.noteText, note.user.password, note.user.salt)
             printer.write(data)
             printer.close()
         } catch (e: IOException){
@@ -164,7 +163,7 @@ object FileManager {
             stream.read(bytes)
             stream.close()
 
-            val decryptedText = Security.decryptToString(bytes, user.password)
+            val decryptedText = Security.decryptToString(bytes, user.password, user.salt)
             note = Note(decryptedText, user)
         } catch (e: IOException){
             e.printStackTrace()
