@@ -14,4 +14,6 @@
     <string name="change_password">Change password</string>
     <string name="old_password">Current password</string>
     <string name="new_password">New password</string>
+    <string name="password_tooltip">A password must have at least 8 characters, including a digit, a
+                                    lowercase letter and an uppercase letter</string>
 </resources>

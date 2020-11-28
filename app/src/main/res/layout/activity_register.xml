@@ -22,7 +22,7 @@
         android:id="@+id/newUsernameInputBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="52dp"
         android:ems="10"
         android:hint="@string/username_input_text"
         android:importantForAutofill="no"
@@ -35,7 +35,7 @@
         android:id="@+id/newPasswordInputBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="@string/password_input_text"
         android:importantForAutofill="no"
@@ -48,14 +48,14 @@
         android:id="@+id/retypePasswordTextBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:ems="10"
         android:hint="@string/pass_repear"
+        android:importantForAutofill="no"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/newPasswordInputBox"
-        android:importantForAutofill="no" />
+        app:layout_constraintTop_toBottomOf="@+id/passwordTooltip" />
 
     <Button
         android:id="@+id/submitNewUserButton"
@@ -68,4 +68,20 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/retypePasswordTextBox" />
+
+    <TextView
+        android:id="@+id/passwordTooltip"
+        android:layout_width="266dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        android:alpha="0.8"
+        android:text="@string/password_tooltip"
+        android:textAlignment="center"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.493"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/newPasswordInputBox" />
 </androidx.constraintlayout.widget.ConstraintLayout>
