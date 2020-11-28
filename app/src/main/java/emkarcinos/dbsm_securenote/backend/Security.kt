@@ -98,6 +98,20 @@ object Security {
     }
 
     /**
+     * Encrypts the string data using AES/CBC method.
+     * The key is hashed with PBKDF before encrypting the message.
+     * The IV is generated randomly and encrypted together with the data
+     * @param lines: input data
+     * @param key: key as a string
+     * @param salt: salt as a string
+     * @return ByteArray with IV and encrypted data.
+     */
+    fun encryptString(lines: String, key: String, salt: String): ByteArray{
+        val hashedPassword = generatePBKDF(key, salt)
+        return encryptString(lines, hashedPassword)
+    }
+
+    /**
      * Attempts to decrypt the data.
      * Data decryption may not be successful - if the keys don't match this may throw an exception,
      * or deciphered data will be wrong.
@@ -136,4 +150,22 @@ object Security {
         val decryptedData: ByteArray = cipher.doFinal(encryptedBytes)
         return String(decryptedData)
     }
+
+    /**
+     * Attempts to decrypt the data.
+     * The key is hashed with PBKDF before decrypting the message.
+     * Data decryption may not be successful - if the keys don't match this may throw an exception,
+     * or deciphered data will be wrong.
+     *
+     * Reverse method to encryptString.
+     * @param bytes: data to decrypt
+     * @param key: key as a string
+     * @param salt: salt as a string
+     * @return String with deciphered text
+     */
+    fun decryptToString(bytes: ByteArray, key: String, salt: String): String{
+        val hashedPassword = generatePBKDF(key, salt)
+        return decryptToString(bytes, hashedPassword)
+    }
+
 }
