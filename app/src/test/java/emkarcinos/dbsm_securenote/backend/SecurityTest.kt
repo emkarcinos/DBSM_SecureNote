@@ -21,4 +21,14 @@ class SecurityTest {
         val decipher = Security.decryptToString(cipher, secret)
         assertEquals(decipher, message)
     }
+
+    @Test
+    fun cipherDecipherTestWithPBKDF() {
+        val secret = "test"
+        val salt = Security.generateSalt()
+        val message = "sdasda/ntest"
+        val cipher = Security.encryptString(message, secret, salt)
+        val decipher = Security.decryptToString(cipher, secret, salt)
+        assertEquals(decipher, message)
+    }
 }
