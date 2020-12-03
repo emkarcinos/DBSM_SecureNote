@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:title="Change password"
-        android:id="@+id/changeNotePasswordMenu"
-        app:showAsAction="never"
-        />
+        android:id="@+id/changePassSettingButton"
+        android:title="@string/change_password"
+        app:showAsAction="never" />
 </menu>

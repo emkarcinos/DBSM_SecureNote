@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
 
         if(!UserManager.validateCredentials(user, password)){
             passwordBox.editableText.clear()
-            passwordBox.error = "Invalid password."
+            passwordBox.error = "Invalid passphrase."
             return null
         }
 

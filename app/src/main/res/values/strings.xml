@@ -1,19 +1,19 @@
 <resources>
     <string name="app_name">Secure Note</string>
     <string name="username_input_text">Username</string>
-    <string name="password_input_text">Password</string>
+    <string name="password_input_text">Passphrase</string>
     <string name="login_button">Log in</string>
     <string name="register_button">Create account</string>
     <string name="welcome_text">Authenticate</string>
 
     <string name="register_text">Register</string>
     <string name="confirm_text">Confirm</string>
-    <string name="pass_repear">Repeat Password</string>
+    <string name="pass_repear">Repeat passphrase</string>
     <string name="submit_new_account">Submit</string>
     <string name="updateNoteBtn">Save Note</string>
-    <string name="change_password">Change password</string>
-    <string name="old_password">Current password</string>
-    <string name="new_password">New password</string>
-    <string name="password_tooltip">A password must have at least 8 characters, including a digit, a
+    <string name="change_password">Change passphrase</string>
+    <string name="old_password">Current passphrase</string>
+    <string name="new_password">New passphrase</string>
+    <string name="password_tooltip">A passphrase must have at least 12 characters, including a digit, a
                                     lowercase letter and an uppercase letter</string>
 </resources>
