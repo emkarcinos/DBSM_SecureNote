@@ -39,7 +39,7 @@ class NoteActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
-            R.id.changeNotePasswordMenu -> {
+            R.id.changePassSettingButton -> {
                 val intent = Intent(this, ChangePasswordActivity::class.java)
                 intent.putExtra("user", user)
                 intent.putExtra("note", note)
