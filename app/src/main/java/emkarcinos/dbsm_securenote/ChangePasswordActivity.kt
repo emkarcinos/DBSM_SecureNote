@@ -54,7 +54,7 @@ class ChangePasswordActivity : AppCompatActivity() {
     }
 
     private fun onSuccessPassChange() {
-        Toast.makeText(this, "Password changed.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Passphrase changed.", Toast.LENGTH_SHORT).show()
         val intent = Intent(this, NoteActivity::class.java)
         intent.putExtra("modifiedUser", user)
         setResult(Activity.RESULT_OK, intent)
@@ -89,21 +89,21 @@ class ChangePasswordActivity : AppCompatActivity() {
 
         //Check if two passwords are equal
         if(password1 != password2){
-            password2box.setError("Passwords do not match.")
+            password2box.setError("Passphrases do not match.")
             return false
         }
 
         // Check if a password matches regex
-        val pattern = Pattern.compile("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$")
+        val pattern = Pattern.compile("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{12,}$")
         val isStrong = pattern.matcher(password2).matches()
 
         if(!isStrong) {
-            password1box.error = "Password too weak."
+            password1box.error = "Passphrase too weak."
             return false
         }
 
         if(!UserManager.validateCredentials(user, oldPass)){
-            oldPasswordBox.error = "Wrong password."
+            oldPasswordBox.error = "Wrong passphrase."
             return false
         }
 
