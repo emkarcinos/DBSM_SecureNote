@@ -10,17 +10,24 @@ import javax.crypto.spec.SecretKeySpec
 
 
 object Security {
-    const val hashAlgorithm = "SHA-256"
+    private const val hashAlgorithm = "SHA-512"
     val hashSize = MessageDigest.getInstance(hashAlgorithm).digestLength
+
+    // Used to cipher/decipher IV
+    // ECB is safe here - we will encrypt only one block of data
+    private val cipherAESECB = Cipher.getInstance("AES/ECB/NoPadding")
+    // Used to cipher/decipher the data
+    private val cipherAESCBC = Cipher.getInstance("AES/CBC/PKCS5Padding")
+
     const val saltSize = 8
 
     private fun ByteArray.toHex(): String {
         return joinToString("") { "%02x".format(it) }
     }
 
-    fun generatePBKDF(password: String, salt: String): String {
+    private fun generatePBKDF(password: String, salt: String): String {
         val keyFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
-        val keySpec = PBEKeySpec(password.toCharArray(), salt.toByteArray(), 10000, hashSize * 8)
+        val keySpec = PBEKeySpec(password.toCharArray(), salt.toByteArray(), 10000, cipherAESCBC.blockSize * 8)
         val key = keyFac.generateSecret(keySpec)
         return key.encoded.toHex()
     }
@@ -30,12 +37,6 @@ object Security {
         val hasher = MessageDigest.getInstance(hashAlgorithm)
         val digested = hasher.digest(bytes)
         return digested.toHex()
-    }
-
-    fun generateHashBytes(message: String): ByteArray {
-        val bytes = message.toByteArray() 
-        val hasher = MessageDigest.getInstance(hashAlgorithm)
-        return hasher.digest(bytes)
     }
 
     /**
@@ -58,47 +59,6 @@ object Security {
 
     /**
      * Encrypts the string data using AES/CBC method.
-     * The IV is generated randomly and encrypted together with the data.
-     * @param lines: input data
-     * @param key: key as a string
-     * @return ByteArray with IV and encrypted data.
-     */
-    fun encryptString(lines: String, key: String): ByteArray{
-        val dataBytes: ByteArray = lines.toByteArray()
-        // Used to cipher the data
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        // Used to cipher IV
-        // ECB is safe here - we will encrypt only one block of data
-        val cipherECB = Cipher.getInstance("AES/ECB/NoPadding")
-
-        val iv = ByteArray(cipher.blockSize)
-        val random = SecureRandom()
-        random.nextBytes(iv)
-        val ivParameterSpec = IvParameterSpec(iv)
-
-        var keyBytes = generateHashBytes(key)
-        // trimming
-        keyBytes = keyBytes.copyOf(cipher.blockSize)
-
-        val secretKeySpec = SecretKeySpec(keyBytes, "AES")
-
-        // Encrypt note
-        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec)
-        val encryptedData = cipher.doFinal(dataBytes)
-
-        // Encrypt IV
-        cipherECB.init(Cipher.ENCRYPT_MODE, secretKeySpec)
-        val encryptedIv = cipherECB.doFinal(iv)
-
-        val finalData = ByteArray(encryptedIv.size + encryptedData.size)
-        System.arraycopy(encryptedIv, 0, finalData, 0, encryptedIv.size)
-        System.arraycopy(encryptedData, 0, finalData, encryptedIv.size, encryptedData.size)
-
-        return finalData
-    }
-
-    /**
-     * Encrypts the string data using AES/CBC method.
      * The key is hashed with PBKDF before encrypting the message.
      * The IV is generated randomly and encrypted together with the data
      * @param lines: input data
@@ -107,48 +67,29 @@ object Security {
      * @return ByteArray with IV and encrypted data.
      */
     fun encryptString(lines: String, key: String, salt: String): ByteArray{
-        val hashedPassword = generatePBKDF(key, salt)
-        return encryptString(lines, hashedPassword)
-    }
+        val hashedPassword = generatePBKDF(key, salt).toByteArray()
+        val dataBytes: ByteArray = lines.toByteArray()
 
-    /**
-     * Attempts to decrypt the data.
-     * Data decryption may not be successful - if the keys don't match this may throw an exception,
-     * or deciphered data will be wrong.
-     *
-     * Reverse method to encryptString.
-     * @param bytes: data to decrypt
-     * @param key: key as a string
-     * @return String with deciphered text
-     */
-    fun decryptToString(bytes: ByteArray, key: String): String {
-        // Used to decipher the data
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        // Used to decipher IV
-        val cipherECB = Cipher.getInstance("AES/ECB/NoPadding")
+        val iv = ByteArray(cipherAESCBC.blockSize)
+        val random = SecureRandom()
+        random.nextBytes(iv)
+        val ivParameterSpec = IvParameterSpec(iv)
 
-        val iv = ByteArray(cipher.blockSize)
-        System.arraycopy(bytes, 0, iv, 0, iv.size)
+        val secretKeySpec = SecretKeySpec(hashedPassword, "AES")
 
-        val encryptedBytes = ByteArray(bytes.size - iv.size)
-        System.arraycopy(bytes, iv.size, encryptedBytes, 0, encryptedBytes.size)
+        // Encrypt note
+        cipherAESCBC.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec)
+        val encryptedData = cipherAESCBC.doFinal(dataBytes)
 
-        var keyBytes = generateHashBytes(key)
-        // trimming
-        keyBytes = keyBytes.copyOf(cipher.blockSize)
+        // Encrypt IV
+        cipherAESECB.init(Cipher.ENCRYPT_MODE, secretKeySpec)
+        val encryptedIv = cipherAESECB.doFinal(iv)
 
-        val secretKeySpec = SecretKeySpec(keyBytes, "AES")
+        val finalData = ByteArray(encryptedIv.size + encryptedData.size)
+        System.arraycopy(encryptedIv, 0, finalData, 0, encryptedIv.size)
+        System.arraycopy(encryptedData, 0, finalData, encryptedIv.size, encryptedData.size)
 
-        // Decrypt IV
-        cipherECB.init(Cipher.DECRYPT_MODE, secretKeySpec)
-        val decryptedIv: ByteArray = cipherECB.doFinal(iv)
-
-        val ivParameterSpec = IvParameterSpec(decryptedIv)
-
-        // Decrypt data
-        cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec)
-        val decryptedData: ByteArray = cipher.doFinal(encryptedBytes)
-        return String(decryptedData)
+        return finalData
     }
 
     /**
@@ -164,8 +105,26 @@ object Security {
      * @return String with deciphered text
      */
     fun decryptToString(bytes: ByteArray, key: String, salt: String): String{
-        val hashedPassword = generatePBKDF(key, salt)
-        return decryptToString(bytes, hashedPassword)
+        val hashedPassword = generatePBKDF(key, salt).toByteArray()
+
+        val iv = ByteArray(cipherAESCBC.blockSize)
+        System.arraycopy(bytes, 0, iv, 0, iv.size)
+
+        val encryptedBytes = ByteArray(bytes.size - iv.size)
+        System.arraycopy(bytes, iv.size, encryptedBytes, 0, encryptedBytes.size)
+
+        val secretKeySpec = SecretKeySpec(hashedPassword, "AES")
+
+        // Decrypt IV
+        cipherAESECB.init(Cipher.DECRYPT_MODE, secretKeySpec)
+        val decryptedIv: ByteArray = cipherAESECB.doFinal(iv)
+
+        val ivParameterSpec = IvParameterSpec(decryptedIv)
+
+        // Decrypt data
+        cipherAESCBC.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec)
+        val decryptedData: ByteArray = cipherAESCBC.doFinal(encryptedBytes)
+        return String(decryptedData)
     }
 
 }

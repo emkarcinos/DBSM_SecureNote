@@ -7,7 +7,7 @@ class User : Serializable{
         this.username = username
         this.password = password
         this.salt = Security.generateSalt()
-        this.passwordHash = Security.generatePBKDF(password, salt)
+        this.passwordHash = Security.generateHash(password + salt)
     }
 
     var username: String
@@ -42,7 +42,7 @@ class User : Serializable{
      */
     fun changePassword(password: String) {
         this.password = password
-        passwordHash = Security.generatePBKDF(password, salt)
+        passwordHash = Security.generateHash(password + salt)
     }
 
 }

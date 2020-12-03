@@ -46,7 +46,7 @@ object UserManager {
      * @return True - if the validation is successful
      */
     fun validateCredentials(user: User, password: String): Boolean {
-        val specifiedPasswordHash = Security.generatePBKDF(password, user.salt)
+        val specifiedPasswordHash = Security.generateHash(password + user.salt)
 
         if(specifiedPasswordHash != user.passwordHash)
             return false
