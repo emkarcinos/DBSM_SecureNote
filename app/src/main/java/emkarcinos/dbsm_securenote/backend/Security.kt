@@ -1,8 +1,13 @@
 package emkarcinos.dbsm_securenote.backend
 
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
+import java.security.Key
+import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.PBEKeySpec
@@ -90,6 +95,27 @@ object Security {
         System.arraycopy(encryptedData, 0, finalData, encryptedIv.size, encryptedData.size)
 
         return finalData
+    }
+
+    fun getOrCreateKeyFromKeystore(keyAlias: String): String {
+        val keystore = KeyStore.getInstance("AndroidKeyStore")
+        keystore.load(null)
+        val key = keystore.getKey(keyAlias, null)
+        return if(key != null)
+            key.encoded.toHex()
+        else {
+            val paramsBuilder = KeyGenParameterSpec.Builder(keyAlias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+            paramsBuilder.apply {
+                setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                setKeySize(256)
+                setUserAuthenticationRequired(true)
+            }
+            val keygen = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
+            keygen.init(paramsBuilder.build())
+            keygen.generateKey().encoded.toHex()
+        }
+
     }
 
     /**
