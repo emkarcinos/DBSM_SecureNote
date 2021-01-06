@@ -1,8 +1,13 @@
 package emkarcinos.dbsm_securenote.backend
 
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
+import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.PBEKeySpec
@@ -17,7 +22,7 @@ object Security {
     // ECB is safe here - we will encrypt only one block of data
     private val cipherAESECB = Cipher.getInstance("AES/ECB/NoPadding")
     // Used to cipher/decipher the data
-    private val cipherAESCBC = Cipher.getInstance("AES/CBC/PKCS5Padding")
+    val cipherAESCBC = Cipher.getInstance("AES/CBC/PKCS5Padding")
 
     const val saltSize = 8
 
@@ -90,6 +95,32 @@ object Security {
         System.arraycopy(encryptedData, 0, finalData, encryptedIv.size, encryptedData.size)
 
         return finalData
+    }
+
+    /**
+     * Gets a key from AndroidKeyStore.
+     * If a key dosen't exits, new one will be generated and returned.
+     * @param keyAlias: Alias after which to look for a key
+     * @return SecretKey object
+     */
+    fun getOrCreateKeyFromKeystore(keyAlias: String): SecretKey? {
+        val keystore = KeyStore.getInstance("AndroidKeyStore")
+        keystore.load(null)
+        val key = keystore.getKey(keyAlias, null)
+        return if(key != null) key as SecretKey
+        else {
+            val paramsBuilder = KeyGenParameterSpec.Builder(keyAlias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+            paramsBuilder.apply {
+                setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                setUserAuthenticationRequired(true)
+                setRandomizedEncryptionRequired(false)
+            }
+            val keygen = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
+            keygen.init(paramsBuilder.build())
+            return keygen.generateKey() as SecretKey
+        }
+
     }
 
     /**
