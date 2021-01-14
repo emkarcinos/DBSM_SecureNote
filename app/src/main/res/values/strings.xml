@@ -16,4 +16,10 @@
     <string name="new_password">New passphrase</string>
     <string name="password_tooltip">A passphrase must have at least 12 characters, including a digit, a
                                     lowercase letter and an uppercase letter</string>
+    <string name="welcome">Welcome to Secure Note</string>
+    <string name="app_info">Secure Note lets you save an encrypted note that nobody besides
+                            you cannot access.</string>
+    <string name="first_run">Before you start using the app, you need to specify a strong
+                            passphrase that will be used to encrypt your note.</string>
+    <string name="get_started_btn">Get started</string>
 </resources>
