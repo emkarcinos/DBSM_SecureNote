@@ -83,6 +83,24 @@ object FileManager {
         }
     }
 
+    /**
+     * Returns salt from a file.
+     * @return salt as String
+     */
+    fun getSalt(): String {
+        var salt: String = ""
+        try {
+            val hashFile = File(usersSubdirectory, hashedPasswordFileName)
+
+            val stream = FileInputStream(hashFile)
+            val bytes = ByteArray(hashFile.length().toInt())
+            stream.read(bytes)
+            salt = String(bytes).drop(Security.hashSize * 2)
+        } catch (e: IOException){
+            e.printStackTrace()
+        }
+        return salt
+    }
 
     /**
      * Attempts to securely save a note.
