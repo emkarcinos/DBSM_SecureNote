@@ -1,6 +1,10 @@
 package emkarcinos.dbsm_securenote.backend
 
 import java.io.*
+import java.security.KeyFactory
+import java.security.PrivateKey
+import java.security.PublicKey
+import java.security.spec.X509EncodedKeySpec
 
 object FileManager {
     // File pointing to the main data folder
@@ -125,6 +129,53 @@ object FileManager {
         } catch (e: IOException){
             e.printStackTrace()
         }
+    }
+
+
+    /**
+     * Saves RSA public key to a file
+     * @param key: RSA PublicKey
+     */
+    fun saveRSAPublicKey(key: PublicKey){
+        if(!isInit)
+            throw ExceptionInInitializerError()
+
+        try {
+            val file = File(usersSubdirectory, rsaPublicKeyFileName)
+
+            if(!file.exists())
+                file.createNewFile()
+
+            val printer = FileOutputStream(file)
+            printer.write(key.encoded)
+            printer.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+
+    /**
+     * Attempts to read RSA public key from a file.
+     * @return RSA PublicKey
+     */
+    fun readRSAPublicKey(): PublicKey?{
+        if(!isInit)
+            throw ExceptionInInitializerError()
+
+        try {
+            val file = File(usersSubdirectory, rsaPublicKeyFileName)
+
+            val stream = FileInputStream(file)
+            val bytes = ByteArray(file.length().toInt())
+            stream.read(bytes)
+            stream.close()
+
+            return KeyFactory.getInstance("RSA").generatePublic(X509EncodedKeySpec(bytes))
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return null
     }
 
     /**
