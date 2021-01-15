@@ -88,10 +88,40 @@ object FileManager {
     }
 
     /**
+     * Attempts to read user from a file
+     * Creates an user object with passwordhash and salt fields set.
+     * @return new user object
+     */
+    fun grabUser(): User?{
+        if(!isInit)
+            throw ExceptionInInitializerError()
+
+        try {
+            val file = File(usersSubdirectory, hashedPasswordFileName)
+
+            val stream = FileInputStream(file)
+            val bytes = ByteArray(file.length().toInt())
+
+            stream.read(bytes)
+            stream.close()
+
+            val hash = String(bytes).dropLast(Security.hashSize * 2)
+            val salt = getSalt()
+
+            return User(hash, salt)
+        } catch (e:IOException){
+            e.printStackTrace()
+        }
+        return null
+    }
+    /**
      * Returns salt from a file.
      * @return salt as String
      */
     fun getSalt(): String {
+
+        if(!isInit)
+            throw ExceptionInInitializerError()
         var salt: String = ""
         try {
             val hashFile = File(usersSubdirectory, hashedPasswordFileName)
