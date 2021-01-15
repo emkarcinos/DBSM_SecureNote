@@ -23,7 +23,7 @@ object Security {
     // Used to cipher/decipher the data
     private val cipherAESCBC: Cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
     // Used to cipher/decipher passphrase by fingerpint
-    val cipherRSA: Cipher = Cipher.getInstance("RSA/ECB/PCKS1Padding")
+    val cipherRSA: Cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
 
     private const val saltSize = 8
 
