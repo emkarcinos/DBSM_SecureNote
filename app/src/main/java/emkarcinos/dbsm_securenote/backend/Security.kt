@@ -159,4 +159,30 @@ object Security {
         return String(decryptedData)
     }
 
+    /**
+     * Encrypts passphrase using RSA.
+     * The key used in encryption is acquired from Android KeyStore
+     * @param passphrase: plaintext passphrase
+     * @param salt: salt as string
+     * @return ByteArray with encrypted data
+     */
+    fun encryptPassphrase(passphrase: String, salt: String): ByteArray{
+        val key: PublicKey = getOrCreateKeyFromKeystore().public
+        cipherRSA.init(Cipher.ENCRYPT_MODE, key)
+        cipherRSA.update(passphrase.toByteArray())
+        cipherRSA.update(salt.toByteArray())
+
+        return cipherRSA.doFinal()
+    }
+
+    /**
+     * Decrypts the passphrase.
+     * NOTE - cipher should be initialized by CyptoObject beofre decrypting!
+     * @param data: Data to decrypt
+     * @return decrypted passphrase
+     */
+    fun decryptPassphrase(data: ByteArray): String{
+        val decrypted = cipherRSA.doFinal(data)
+        return String(decrypted).dropLast(saltSize * 2)
+    }
 }
