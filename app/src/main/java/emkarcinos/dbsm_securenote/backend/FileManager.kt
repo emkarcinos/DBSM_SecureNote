@@ -89,8 +89,15 @@ object FileManager {
             hashPrinter.close()
 
             if (user.hasFinerprint) {
-                //TODO: Get RSA public key, use it to encrypt the passphrase and save it to a file
-            }
+                val securePassFile = File(usersSubdirectory, encryptedPassphraseFileName)
+
+                if(!securePassFile.exists())
+                    securePassFile.createNewFile()
+
+                val printer = FileOutputStream(securePassFile)
+                printer.write(user.encryptedPassword)
+                printer.close()
+              }
 
         } catch (e: IOException) {
             e.printStackTrace()
