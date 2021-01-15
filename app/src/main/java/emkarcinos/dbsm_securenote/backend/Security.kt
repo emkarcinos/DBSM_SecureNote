@@ -108,7 +108,7 @@ object Security {
         val keystore = KeyStore.getInstance("AndroidKeyStore")
         keystore.load(null)
         val privateKey = keystore.getKey(keystoreAlias, null) as PrivateKey?
-        val publicKey = keystore.getCertificate(keystoreAlias)?.publicKey
+        val publicKey = if (privateKey != null) keystore.getCertificate(keystoreAlias)?.publicKey else null
         return if (privateKey != null && publicKey != null) KeyPair(publicKey, privateKey)
         else {
             val paramsBuilder = KeyGenParameterSpec.Builder(keystoreAlias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
