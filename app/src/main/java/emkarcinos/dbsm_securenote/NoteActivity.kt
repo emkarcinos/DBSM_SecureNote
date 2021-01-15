@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import emkarcinos.dbsm_securenote.backend.FileManager
 import emkarcinos.dbsm_securenote.backend.Note
@@ -79,5 +80,11 @@ class NoteActivity : AppCompatActivity() {
         note.noteText = grabbedText
         FileManager.saveNote(note)
         Toast.makeText(this, "Successfully saved and secured!", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        onSaveButton(View(this))
+        startActivity(Intent(this, MainActivity::class.java))
     }
 }

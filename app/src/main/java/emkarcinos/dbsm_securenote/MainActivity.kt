@@ -145,4 +145,9 @@ class MainActivity : AppCompatActivity() {
 
         return user
     }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finishAffinity()
+    }
 }
