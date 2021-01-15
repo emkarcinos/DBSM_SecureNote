@@ -19,11 +19,13 @@ object Security {
     private const val keystoreAlias = "securenote_rsa"
     // Used to cipher/decipher IV
     // ECB is safe here - we will encrypt only one block of data
-    private val cipherAESECB = Cipher.getInstance("AES/ECB/NoPadding")
+    private val cipherAESECB: Cipher = Cipher.getInstance("AES/ECB/NoPadding")
     // Used to cipher/decipher the data
-    val cipherAESCBC = Cipher.getInstance("AES/CBC/PKCS5Padding")
+    private val cipherAESCBC: Cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+    // Used to cipher/decipher passphrase by fingerpint
+    val cipherRSA: Cipher = Cipher.getInstance("RSA/ECB/PCKS1Padding")
 
-    const val saltSize = 8
+    private const val saltSize = 8
 
     private fun ByteArray.toHex(): String {
         return joinToString("") { "%02x".format(it) }
@@ -101,7 +103,7 @@ object Security {
      * If the key dosen't exits, new one will be generated and returned.
      * @return KeyPair object
      */
-    fun getOrCreateKeyFromKeystore(): KeyPair? {
+    fun getOrCreateKeyFromKeystore(): KeyPair {
         val keystore = KeyStore.getInstance("AndroidKeyStore")
         keystore.load(null)
         val privateKey = keystore.getKey(keystoreAlias, null) as PrivateKey?
