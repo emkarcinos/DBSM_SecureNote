@@ -2,9 +2,7 @@ package emkarcinos.dbsm_securenote.backend
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import java.security.KeyStore
-import java.security.MessageDigest
-import java.security.SecureRandom
+import java.security.*
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -18,6 +16,7 @@ object Security {
     private const val hashAlgorithm = "SHA-512"
     val hashSize = MessageDigest.getInstance(hashAlgorithm).digestLength
 
+    private const val keystoreAlias = "securenote_rsa"
     // Used to cipher/decipher IV
     // ECB is safe here - we will encrypt only one block of data
     private val cipherAESECB = Cipher.getInstance("AES/ECB/NoPadding")
@@ -98,27 +97,27 @@ object Security {
     }
 
     /**
-     * Gets a key from AndroidKeyStore.
-     * If a key dosen't exits, new one will be generated and returned.
-     * @param keyAlias: Alias after which to look for a key
-     * @return SecretKey object
+     * Gets RSA key pair from AndroidKeyStore.
+     * If the key dosen't exits, new one will be generated and returned.
+     * @return KeyPair object
      */
-    fun getOrCreateKeyFromKeystore(keyAlias: String): SecretKey? {
+    fun getOrCreateKeyFromKeystore(): KeyPair? {
         val keystore = KeyStore.getInstance("AndroidKeyStore")
         keystore.load(null)
-        val key = keystore.getKey(keyAlias, null)
-        return if(key != null) key as SecretKey
+        val privateKey = keystore.getKey(keystoreAlias, null) as PrivateKey?
+        val publicKey = keystore.getCertificate(keystoreAlias)?.publicKey
+        return if(privateKey != null && publicKey != null) KeyPair(publicKey, privateKey)
         else {
-            val paramsBuilder = KeyGenParameterSpec.Builder(keyAlias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+            val paramsBuilder = KeyGenParameterSpec.Builder(keystoreAlias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
             paramsBuilder.apply {
-                setBlockModes(KeyProperties.BLOCK_MODE_CBC)
-                setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                setBlockModes(KeyProperties.BLOCK_MODE_ECB)
+                setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
                 setUserAuthenticationRequired(true)
                 setRandomizedEncryptionRequired(false)
             }
-            val keygen = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
-            keygen.init(paramsBuilder.build())
-            return keygen.generateKey() as SecretKey
+            val keygen = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore")
+            keygen.initialize(2048)
+            return keygen.generateKeyPair()
         }
 
     }
