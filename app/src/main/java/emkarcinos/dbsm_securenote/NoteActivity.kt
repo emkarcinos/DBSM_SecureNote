@@ -26,9 +26,6 @@ class NoteActivity : AppCompatActivity() {
 
         user = intent.getSerializableExtra("user") as User
 
-        val title = findViewById<TextView>(R.id.noteTitle)
-        title.text = user.username + "'s Note"
-
         getLoggedUsersNote()
     }
 
