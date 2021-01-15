@@ -1,20 +1,28 @@
 package emkarcinos.dbsm_securenote
 
 import android.content.Intent
+import android.graphics.drawable.ColorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import emkarcinos.dbsm_securenote.backend.FileManager
+import androidx.appcompat.app.AlertDialog
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricManager.BIOMETRIC_SUCCESS
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import emkarcinos.dbsm_securenote.backend.User
 import emkarcinos.dbsm_securenote.backend.UserManager
-import java.util.regex.Pattern
 
 class Register : AppCompatActivity() {
     private lateinit var password1box: EditText
     private lateinit var password2box: EditText
+
+    private lateinit var biometricPrompt: BiometricPrompt
+
+    private lateinit var user: User
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,8 +32,12 @@ class Register : AppCompatActivity() {
     }
 
     fun submitButtonClick(v: View){
-        if(createUser())
-            onSuccessUserCreate()
+        if(createUser()) {
+            if(biometricsAvailable())
+                showFingerprintPrompt()
+            else
+                onSuccessUserCreate()
+        }
     }
 
     private fun onSuccessUserCreate() {
@@ -33,6 +45,40 @@ class Register : AppCompatActivity() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
     }
+
+    private fun biometricsAvailable(): Boolean {
+        val biometricManager = BiometricManager.from(this)
+        return biometricManager.canAuthenticate() == BIOMETRIC_SUCCESS
+    }
+
+    private fun showFingerprintPrompt(){
+        val dialogBuilder = AlertDialog.Builder(this)
+        val popupView = layoutInflater.inflate(R.layout.add_fingerprint_popup, null)
+
+        dialogBuilder.setView(popupView)
+        val dialog = dialogBuilder.create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(0))
+
+        val yesBtn = popupView.findViewById<Button>(R.id.yesBtn)
+        val skipBtn = popupView.findViewById<Button>(R.id.skipBtn)
+
+        yesBtn.setOnClickListener {
+            setupBiometrics()
+            val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                    .setTitle("Adding biometrics to our app")
+                    .setNegativeButtonText("Cancel")
+                    .build()
+            biometricPrompt.authenticate(promptInfo)
+        }
+
+        skipBtn.setOnClickListener {
+            onSuccessUserCreate()
+        }
+
+        dialog.show()
+
+    }
+
 
     private fun createUser(): Boolean {
 
@@ -59,9 +105,30 @@ class Register : AppCompatActivity() {
             return false
         }
 
-        val user = UserManager.createNewUser(password2)
+        user = UserManager.createNewUser(password2)!!
 
         return true
 
     }
+
+    private fun setupBiometrics() {
+        val executor = ContextCompat.getMainExecutor(this)
+        biometricPrompt = BiometricPrompt(this, executor,
+                object : BiometricPrompt.AuthenticationCallback() {
+                    override fun onAuthenticationSucceeded(
+                            result: BiometricPrompt.AuthenticationResult) {
+                        super.onAuthenticationSucceeded(result)
+                        UserManager.addFingerprint(user)
+                        onSuccessUserCreate()
+                    }
+
+                    override fun onAuthenticationFailed() {
+                        super.onAuthenticationFailed()
+                        Toast.makeText(applicationContext, "Authentication failed",
+                                Toast.LENGTH_SHORT)
+                                .show()
+                    }
+                })
+    }
+
 }

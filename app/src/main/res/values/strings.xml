@@ -21,4 +21,10 @@
     <string name="first_run">Before you start using the app, you need to specify a strong
                             passphrase that will be used to encrypt your note.</string>
     <string name="get_started_btn">Get started</string>
+    <string name="add_fingerprint">Enable fingerprint authentication</string>
+    <string name="add_fingerprint_tooltip">Your device has available fingerprint hardware that can
+                                        be used to log into the application.</string>
+    <string name="add_fingerprint_prompt">Do you want to use it in the app?</string>
+    <string name="yes">Yes</string>
+    <string name="no">Skip</string>
 </resources>
