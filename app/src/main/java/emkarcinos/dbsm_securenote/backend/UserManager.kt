@@ -1,5 +1,7 @@
 package emkarcinos.dbsm_securenote.backend
 
+import java.io.File
+
 object UserManager {
 
     /**
@@ -78,7 +80,10 @@ object UserManager {
      * Note object.
      */
     fun getUsersNote(user: User): Note? {
-        return null
+        return if(FileManager.noteExists())
+            Note(FileManager.readNote()!!, user)
+        else
+            null
     }
 
     /**
@@ -89,10 +94,10 @@ object UserManager {
      */
     fun createNote(user: User): Note? {
         val note = Note("", user)
-//        when {
-//            FileManager.noteExists(note) -> return null
-//            else -> FileManager.saveNote(note)
-//        }
+        when {
+            FileManager.noteExists() -> return null
+            else -> FileManager.saveNote(note.noteText)
+        }
         return note
     }
 }
