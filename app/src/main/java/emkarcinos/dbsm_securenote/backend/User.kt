@@ -17,6 +17,8 @@ class User : Serializable{
 
     var note: Note? = null
 
+    var hasFinerprint: Boolean = false
+
     /**
      * Creates a new user instance from already existing user in the database.
      *

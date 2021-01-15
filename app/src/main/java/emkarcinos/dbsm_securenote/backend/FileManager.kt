@@ -9,12 +9,19 @@ object FileManager {
     // Subdirectory name containing encrypted notes
     private const val notesFolderName: String = "notes"
     // Subdirectory name with user data
-    private const val userdataFolderName: String = "users"
+    private const val userdataFolderName: String = "user"
 
     private const val noteFileName : String = "note"
     // Pointers to subdirectories
     private lateinit var noteSubdirectory: File
     private lateinit var usersSubdirectory: File
+
+    // File name contaning SHA512 hash with salt
+    private const val hashedPasswordFileName: String = "login"
+    // File name contaning RSA public key
+    private const val rsaPublicKeyFileName: String = "rsa_pub"
+    // File name contaning RSA encrypted secret
+    private const val encryptedPassphraseFileName: String = "mk"
 
     private var isInit = false
 
@@ -34,7 +41,7 @@ object FileManager {
 
             isInit = true
         } else
-            System.out.println("Alredy initialized!")
+            println("Alredy initialized!")
     }
 
     /**
@@ -45,6 +52,37 @@ object FileManager {
         val file = File(noteSubdirectory, noteFileName)
         return file.exists()
     }
+
+    /**
+     * Checks whether the user has alredy created an account.
+     * @return true, if it has. Otherwise false
+     */
+    fun userFileExists(): Boolean {
+        val file = File(noteSubdirectory, hashedPasswordFileName)
+        return file.exists()
+    }
+
+    fun saveUserData(user: User) {
+        try {
+            val hashFile = File(usersSubdirectory, hashedPasswordFileName)
+
+            if(!hashFile.exists())
+                hashFile.createNewFile()
+
+            val hashPrinter = FileOutputStream(hashFile)
+            hashPrinter.write(user.passwordHash.toByteArray())
+            hashPrinter.write(user.salt.toByteArray())
+            hashPrinter.close()
+
+            if(user.hasFinerprint){
+                //TODO: Get RSA public key, use it to encrypt the passphrase and save it to a file
+            }
+
+        } catch (e: IOException){
+            e.printStackTrace()
+        }
+    }
+
 
     /**
      * Attempts to securely save a note.
