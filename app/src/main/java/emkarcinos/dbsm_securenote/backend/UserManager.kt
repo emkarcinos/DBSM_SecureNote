@@ -81,7 +81,7 @@ object UserManager {
      */
     fun getUsersNote(user: User): Note? {
         return if(FileManager.noteExists())
-            Note(FileManager.readNote()!!, user)
+            Note(FileManager.readNote(user)!!, user)
         else
             null
     }
@@ -96,7 +96,7 @@ object UserManager {
         val note = Note("", user)
         when {
             FileManager.noteExists() -> return null
-            else -> FileManager.saveNote(note.noteText)
+            else -> FileManager.saveNote(note)
         }
         return note
     }
