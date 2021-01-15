@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity() {
         button.setOnClickListener {
             val intent = Intent(this, Register::class.java)
             startActivity(intent)
+            dialog.dismiss()
         }
         dialog.show()
 

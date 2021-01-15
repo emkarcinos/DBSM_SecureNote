@@ -1,5 +1,6 @@
 package emkarcinos.dbsm_securenote
 
+import android.app.Dialog
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +27,7 @@ class Register : AppCompatActivity() {
     private lateinit var user: User
 
     private lateinit var popupView: View
+    private lateinit var dialog: Dialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +61,7 @@ class Register : AppCompatActivity() {
         popupView = layoutInflater.inflate(R.layout.add_fingerprint_popup, null)
 
         dialogBuilder.setView(popupView)
-        val dialog = dialogBuilder.create()
+        dialog = dialogBuilder.create()
         dialog.window?.setBackgroundDrawable(ColorDrawable(0))
 
         val yesBtn = popupView.findViewById<Button>(R.id.yesBtn)
@@ -76,6 +78,7 @@ class Register : AppCompatActivity() {
         }
 
         skipBtn.setOnClickListener {
+            dialog.dismiss()
             onSuccessUserCreate()
         }
 
@@ -123,6 +126,7 @@ class Register : AppCompatActivity() {
                             result: BiometricPrompt.AuthenticationResult) {
                         super.onAuthenticationSucceeded(result)
                         UserManager.addFingerprint(user)
+                        dialog.dismiss()
                         onSuccessUserCreate()
                     }
 
