@@ -77,14 +77,17 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    fun onSuccessAuthenticate(){
+        Toast.makeText(this,"Successfully authenticated.", Toast.LENGTH_SHORT).show()
+        val intent = Intent(this, NoteActivity::class.java)
+        intent.putExtra("user", user)
+        startActivity(intent)
+    }
     fun loginButtonClick(v: View){
         val user = authenticate()
         if(user != null){
-            Toast.makeText(this,"Successfully authenticated.", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, NoteActivity::class.java)
-            intent.putExtra("user", user)
-            startActivity(intent)
             clearTextBoxes()
+            onSuccessAuthenticate()
         }
     }
 
@@ -97,10 +100,11 @@ class MainActivity : AppCompatActivity() {
                     override fun onAuthenticationSucceeded(
                             result: BiometricPrompt.AuthenticationResult) {
                         super.onAuthenticationSucceeded(result)
-                        Toast.makeText(applicationContext,
-                                "Authentication succeeded!", Toast.LENGTH_SHORT)
-                                .show()
-                        //TODO
+                        val encryptedPassphrase = FileManager.getEncryptedKey()
+                        user.password = Security.decryptPassphrase(encryptedPassphrase)
+                        clearTextBoxes()
+                        onSuccessAuthenticate()
+
                     }
                 })
     }
