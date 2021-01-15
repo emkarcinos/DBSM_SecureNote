@@ -1,20 +1,23 @@
 package emkarcinos.dbsm_securenote
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import emkarcinos.dbsm_securenote.backend.*
 import java.util.regex.Pattern
 
 class ChangePasswordActivity : AppCompatActivity() {
-
-    // Timeout between consecutive login attempts
-    private val loginTimeout = 1000L
-    private var lastButtonClickTime = 0L
 
     private lateinit var oldPasswordBox: EditText
     private lateinit var password1box: EditText
@@ -22,6 +25,12 @@ class ChangePasswordActivity : AppCompatActivity() {
 
     private lateinit var user: User
     private lateinit var note: Note
+
+
+    private lateinit var popupView: View
+    private lateinit var popupDialog: Dialog
+
+    private lateinit var biometricPrompt: BiometricPrompt
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +44,6 @@ class ChangePasswordActivity : AppCompatActivity() {
         password2box = findViewById(R.id.newPasswordBox2)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        lastButtonClickTime = System.currentTimeMillis()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -44,12 +51,10 @@ class ChangePasswordActivity : AppCompatActivity() {
         return true
     }
     fun onSubmitBtnClick(v: View) {
-        if(System.currentTimeMillis() - lastButtonClickTime < loginTimeout)
-            return
-
-        lastButtonClickTime = System.currentTimeMillis()
         if(changePassword()) {
-            onSuccessPassChange()
+            if(!user.hasFinerprint)
+                showFingerprintPrompt()
+            else onSuccessPassChange()
         }
     }
 
@@ -93,15 +98,6 @@ class ChangePasswordActivity : AppCompatActivity() {
             return false
         }
 
-        // Check if a password matches regex
-        val pattern = Pattern.compile("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{12,}$")
-        val isStrong = pattern.matcher(password2).matches()
-
-        if(!isStrong) {
-            password1box.error = "Passphrase too weak."
-            return false
-        }
-
         if(!UserManager.validateCredentials(user, oldPass)){
             oldPasswordBox.error = "Wrong passphrase."
             return false
@@ -110,5 +106,55 @@ class ChangePasswordActivity : AppCompatActivity() {
         UserManager.updateUserPassword(user, password2)
         return true
 
+    }
+
+    private fun showFingerprintPrompt(){
+        val dialogBuilder = AlertDialog.Builder(this)
+        popupView = layoutInflater.inflate(R.layout.add_fingerprint_popup, null)
+
+        dialogBuilder.setView(popupView)
+        popupDialog = dialogBuilder.create()
+        popupDialog.window?.setBackgroundDrawable(ColorDrawable(0))
+
+        val yesBtn = popupView.findViewById<Button>(R.id.yesBtn)
+        val skipBtn = popupView.findViewById<Button>(R.id.skipBtn)
+
+        yesBtn.setOnClickListener {
+            setupBiometrics()
+            popupView.findViewById<ProgressBar>(R.id.loadingBar).visibility = View.VISIBLE
+            val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                    .setTitle("Adding biometrics to our app")
+                    .setNegativeButtonText("Cancel")
+                    .build()
+            biometricPrompt.authenticate(promptInfo)
+        }
+
+        skipBtn.setOnClickListener {
+            onSuccessPassChange()
+        }
+
+        popupDialog.show()
+
+    }
+
+    private fun setupBiometrics() {
+        val executor = ContextCompat.getMainExecutor(this)
+        biometricPrompt = BiometricPrompt(this, executor,
+                object : BiometricPrompt.AuthenticationCallback() {
+                    override fun onAuthenticationSucceeded(
+                            result: BiometricPrompt.AuthenticationResult) {
+                        super.onAuthenticationSucceeded(result)
+                        UserManager.addFingerprint(user)
+                        popupDialog.dismiss()
+                        onSuccessPassChange()
+                    }
+
+                    override fun onAuthenticationFailed() {
+                        super.onAuthenticationFailed()
+                        Toast.makeText(applicationContext, "Authentication failed",
+                                Toast.LENGTH_SHORT)
+                                .show()
+                    }
+                })
     }
 }
