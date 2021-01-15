@@ -1,12 +1,15 @@
 package emkarcinos.dbsm_securenote
 
 import android.content.Intent
+import android.graphics.drawable.ColorDrawable
 import androidx.biometric.BiometricManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
@@ -14,52 +17,53 @@ import emkarcinos.dbsm_securenote.backend.FileManager
 import emkarcinos.dbsm_securenote.backend.Security
 import emkarcinos.dbsm_securenote.backend.User
 import emkarcinos.dbsm_securenote.backend.UserManager
-import java.security.SecureRandom
 import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
 import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
     private lateinit var biometricPrompt: BiometricPrompt
-    // Timeout between consecutive login attempts
-    private val loginTimeout = 1000L
-    private var lastButtonClickTime = 0L
-    private lateinit var usernameBox: EditText
-    private lateinit var passwordBox: EditText
-    var note = ""
 
+    private lateinit var passwordBox: EditText
+    private lateinit var dialogBuilder: AlertDialog.Builder
+    private lateinit var dialog: AlertDialog
+    var note = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        usernameBox = findViewById(R.id.usernameInputBox)
         passwordBox = findViewById(R.id.passwordInputBox)
         // FileManager setup
         FileManager.init(applicationContext.filesDir)
 
-        lastButtonClickTime = System.currentTimeMillis()
-    }
-
-    private fun createCryptoObject(operation: Int): BiometricPrompt.CryptoObject {
-        val iv: ByteArray
-        when {
-            FileManager.noteExists() and (operation == Cipher.DECRYPT_MODE) -> {
-                iv = FileManager.readIv()!!
-            }
-            else -> {
-                iv = ByteArray(16)
-                val random = SecureRandom()
-                random.nextBytes(iv)
-            }
+        if(!FileManager.userFileExists())
+            showFirstRunPopup()
+        else {
+            val btn = findViewById<Button>(R.id.registerButton)
+            btn.visibility=View.GONE
         }
-        val ivParameterSpec = IvParameterSpec(iv)
-
-        Security.cipherAESCBC.init(operation, Security.getOrCreateKeyFromKeystore("securenote"), ivParameterSpec)
-
-        return BiometricPrompt.CryptoObject(Security.cipherAESCBC)
-
     }
 
+    private fun createCryptoObject(): BiometricPrompt.CryptoObject {
+        Security.cipherRSA.init(Cipher.DECRYPT_MODE, Security.getOrCreateKeyFromKeystore().private)
+        return BiometricPrompt.CryptoObject(Security.cipherRSA)
+    }
+
+    private fun showFirstRunPopup(){
+        dialogBuilder = AlertDialog.Builder(this)
+        val popupView = layoutInflater.inflate(R.layout.first_login_popup, null);
+
+        dialogBuilder.setView(popupView)
+        dialog = dialogBuilder.create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(0))
+        val button = popupView.findViewById<Button>(R.id.getStartedBtn)
+
+        button.setOnClickListener {
+            val intent = Intent(this, Register::class.java)
+            startActivity(intent)
+        }
+        dialog.show()
+
+    }
 
     fun switchToRegisterPage(v: View) {
         val intent = Intent(this, Register::class.java)
@@ -67,10 +71,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun loginButtonClick(v: View){
-        if(System.currentTimeMillis() - lastButtonClickTime < loginTimeout)
-            return
         val user = authenticate()
-        lastButtonClickTime = System.currentTimeMillis()
         if(user != null){
             Toast.makeText(this,"Successfully authenticated.", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, NoteActivity::class.java)
@@ -118,46 +119,25 @@ class MainActivity : AppCompatActivity() {
             exitProcess(1)
     }
 
-    private fun getLoggedUsersNote() {
-        val noteBox = findViewById<EditText>(R.id.noteTextBox)
-
-        val loadedNote = FileManager.readNote()
-        if (loadedNote != null)
-            note = loadedNote
-        noteBox.setText(note)
-    }
-
 
     private fun clearTextBoxes(){
-        usernameBox.editableText.clear()
         passwordBox.editableText.clear()
     }
 
 
     private fun authenticate(): User?{
-        usernameBox.error = null
         passwordBox.error = null
 
-        val username = usernameBox.editableText.toString().trim()
         val password = passwordBox.editableText.toString().trim()
 
-        if(username.isEmpty()){
-            usernameBox.error = "Required."
-            return null
-        }
         if(password.isEmpty()){
             passwordBox.error = "Required."
             return null
         }
 
-        val user = UserManager.getUserByName(username)
+        val user = UserManager.getUser()
 
-        if(user == null){
-            usernameBox.error = "This user does not exist."
-            return null
-        }
-
-        if(!UserManager.validateCredentials(user, password)){
+        if(!UserManager.validateCredentials(user!!, password)){
             passwordBox.editableText.clear()
             passwordBox.error = "Invalid passphrase."
             return null
