@@ -26,6 +26,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var passwordBox: EditText
     private lateinit var dialogBuilder: AlertDialog.Builder
     private lateinit var dialog: AlertDialog
+
+    private lateinit var user: User
     var note = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,8 +40,13 @@ class MainActivity : AppCompatActivity() {
         if(!FileManager.userFileExists())
             showFirstRunPopup()
         else {
-            val btn = findViewById<Button>(R.id.registerButton)
-            btn.visibility=View.GONE
+            user = UserManager.getUser()!!
+
+            findViewById<Button>(R.id.registerButton).visibility=View.GONE
+
+            if(user.hasFinerprint)
+                findViewById<Button>(R.id.fingerLoginBtn).visibility=View.VISIBLE
+
         }
     }
 
@@ -87,14 +94,6 @@ class MainActivity : AppCompatActivity() {
         val executor = ContextCompat.getMainExecutor(this)
         biometricPrompt = BiometricPrompt(this, executor,
                 object : BiometricPrompt.AuthenticationCallback() {
-                    override fun onAuthenticationError(errorCode: Int,
-                                                       errString: CharSequence) {
-                        super.onAuthenticationError(errorCode, errString)
-                        Toast.makeText(applicationContext,
-                                "Authentication error: $errString", Toast.LENGTH_SHORT)
-                                .show()
-                    }
-
                     override fun onAuthenticationSucceeded(
                             result: BiometricPrompt.AuthenticationResult) {
                         super.onAuthenticationSucceeded(result)
@@ -102,13 +101,6 @@ class MainActivity : AppCompatActivity() {
                                 "Authentication succeeded!", Toast.LENGTH_SHORT)
                                 .show()
                         //TODO
-                    }
-
-                    override fun onAuthenticationFailed() {
-                        super.onAuthenticationFailed()
-                        Toast.makeText(applicationContext, "Authentication failed",
-                                Toast.LENGTH_SHORT)
-                                .show()
                     }
                 })
     }
@@ -135,7 +127,6 @@ class MainActivity : AppCompatActivity() {
             return null
         }
 
-        val user = UserManager.getUser()
 
         if(!UserManager.validateCredentials(user!!, password)){
             passwordBox.editableText.clear()
@@ -144,6 +135,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         return user
+    }
+
+    fun authenticateFingerprint(v: View){
+        setupBiometrics()
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Log in to see your note")
+                .setNegativeButtonText("Cancel")
+                .build()
+        biometricPrompt.authenticate(promptInfo, createCryptoObject())
     }
 
     override fun onBackPressed() {

@@ -27,4 +27,5 @@
     <string name="add_fingerprint_prompt">Do you want to use it in the app?</string>
     <string name="yes">Yes</string>
     <string name="no">Skip</string>
+    <string name="finger_login">Log in using fingerprint</string>
 </resources>
