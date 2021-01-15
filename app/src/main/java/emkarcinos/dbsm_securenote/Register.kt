@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.biometric.BiometricManager
@@ -23,6 +24,8 @@ class Register : AppCompatActivity() {
     private lateinit var biometricPrompt: BiometricPrompt
 
     private lateinit var user: User
+
+    private lateinit var popupView: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +56,7 @@ class Register : AppCompatActivity() {
 
     private fun showFingerprintPrompt(){
         val dialogBuilder = AlertDialog.Builder(this)
-        val popupView = layoutInflater.inflate(R.layout.add_fingerprint_popup, null)
+        popupView = layoutInflater.inflate(R.layout.add_fingerprint_popup, null)
 
         dialogBuilder.setView(popupView)
         val dialog = dialogBuilder.create()
@@ -64,6 +67,7 @@ class Register : AppCompatActivity() {
 
         yesBtn.setOnClickListener {
             setupBiometrics()
+            popupView.findViewById<ProgressBar>(R.id.loadingBar).visibility = View.VISIBLE
             val promptInfo = BiometricPrompt.PromptInfo.Builder()
                     .setTitle("Adding biometrics to our app")
                     .setNegativeButtonText("Cancel")
