@@ -1,8 +1,10 @@
 package emkarcinos.dbsm_securenote.backend
 
-import java.io.*
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 import java.security.KeyFactory
-import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec
 
@@ -12,18 +14,22 @@ object FileManager {
 
     // Subdirectory name containing encrypted notes
     private const val notesFolderName: String = "notes"
+
     // Subdirectory name with user data
     private const val userdataFolderName: String = "user"
 
-    private const val noteFileName : String = "note"
+    private const val noteFileName: String = "note"
+
     // Pointers to subdirectories
     private lateinit var noteSubdirectory: File
     private lateinit var usersSubdirectory: File
 
     // File name contaning SHA512 hash with salt
     private const val hashedPasswordFileName: String = "login"
+
     // File name contaning RSA public key
     private const val rsaPublicKeyFileName: String = "rsa_pub"
+
     // File name contaning RSA encrypted secret
     private const val encryptedPassphraseFileName: String = "mk"
 
@@ -33,14 +39,18 @@ object FileManager {
      * Initializes the manager in a given directory
      * @param directory: Directory file
      */
-    fun init(directory: File){
-        if(!isInit){
+    fun init(directory: File) {
+        if (!isInit) {
             this.appDirectory = directory
             this.noteSubdirectory = File(directory, notesFolderName)
             this.usersSubdirectory = File(directory, userdataFolderName)
 
-            when {!usersSubdirectory.exists() -> usersSubdirectory.mkdir()}
-            when {!noteSubdirectory.exists() -> noteSubdirectory.mkdir()}
+            when {
+                !usersSubdirectory.exists() -> usersSubdirectory.mkdir()
+            }
+            when {
+                !noteSubdirectory.exists() -> noteSubdirectory.mkdir()
+            }
 
 
             isInit = true
@@ -70,7 +80,7 @@ object FileManager {
         try {
             val hashFile = File(usersSubdirectory, hashedPasswordFileName)
 
-            if(!hashFile.exists())
+            if (!hashFile.exists())
                 hashFile.createNewFile()
 
             val hashPrinter = FileOutputStream(hashFile)
@@ -78,11 +88,11 @@ object FileManager {
             hashPrinter.write(user.salt.toByteArray())
             hashPrinter.close()
 
-            if(user.hasFinerprint){
+            if (user.hasFinerprint) {
                 //TODO: Get RSA public key, use it to encrypt the passphrase and save it to a file
             }
 
-        } catch (e: IOException){
+        } catch (e: IOException) {
             e.printStackTrace()
         }
     }
@@ -92,8 +102,8 @@ object FileManager {
      * Creates an user object with passwordhash and salt fields set.
      * @return new user object
      */
-    fun grabUser(): User?{
-        if(!isInit)
+    fun grabUser(): User? {
+        if (!isInit)
             throw ExceptionInInitializerError()
 
         try {
@@ -105,22 +115,23 @@ object FileManager {
             stream.read(bytes)
             stream.close()
 
-            val hash = String(bytes).dropLast(Security.hashSize * 2)
+            val hash = String(bytes).dropLast(Security.saltSize * 2)
             val salt = getSalt()
 
             return User(hash, salt)
-        } catch (e:IOException){
+        } catch (e: IOException) {
             e.printStackTrace()
         }
         return null
     }
+
     /**
      * Returns salt from a file.
      * @return salt as String
      */
     fun getSalt(): String {
 
-        if(!isInit)
+        if (!isInit)
             throw ExceptionInInitializerError()
         var salt: String = ""
         try {
@@ -130,7 +141,7 @@ object FileManager {
             val bytes = ByteArray(hashFile.length().toInt())
             stream.read(bytes)
             salt = String(bytes).drop(Security.hashSize * 2)
-        } catch (e: IOException){
+        } catch (e: IOException) {
             e.printStackTrace()
         }
         return salt
@@ -141,8 +152,8 @@ object FileManager {
      * Make sure to setup cipher object before!
      * @param note : string data
      */
-    fun saveNote(note: String) {
-        if(!isInit)
+    fun saveNote(note: Note) {
+        if (!isInit)
             throw ExceptionInInitializerError()
 
         try {
@@ -153,10 +164,10 @@ object FileManager {
 
             val printer = FileOutputStream(file)
 
-            //TODO val data = Security.encryptString(note)
-            //printer.write(data)
+            val data = Security.encryptString(note.noteText, note.user.password, note.user.salt)
+            printer.write(data)
             printer.close()
-        } catch (e: IOException){
+        } catch (e: IOException) {
             e.printStackTrace()
         }
     }
@@ -166,14 +177,14 @@ object FileManager {
      * Saves RSA public key to a file
      * @param key: RSA PublicKey
      */
-    fun saveRSAPublicKey(key: PublicKey){
-        if(!isInit)
+    fun saveRSAPublicKey(key: PublicKey) {
+        if (!isInit)
             throw ExceptionInInitializerError()
 
         try {
             val file = File(usersSubdirectory, rsaPublicKeyFileName)
 
-            if(!file.exists())
+            if (!file.exists())
                 file.createNewFile()
 
             val printer = FileOutputStream(file)
@@ -189,8 +200,8 @@ object FileManager {
      * Attempts to read RSA public key from a file.
      * @return RSA PublicKey
      */
-    fun readRSAPublicKey(): PublicKey?{
-        if(!isInit)
+    fun readRSAPublicKey(): PublicKey? {
+        if (!isInit)
             throw ExceptionInInitializerError()
 
         try {
@@ -213,13 +224,13 @@ object FileManager {
      * Make sure to setup cipher object before!
      * @return: On success, return a note as a string.
      */
-    fun readNote(): String? {
-        if(!isInit)
+    fun readNote(user: User): String? {
+        if (!isInit)
             throw ExceptionInInitializerError()
 
         try {
             val file = File(noteSubdirectory, noteFileName)
-            if(!file.exists())
+            if (!file.exists())
                 return null
 
             val stream = FileInputStream(file)
@@ -227,8 +238,8 @@ object FileManager {
             stream.read(bytes)
             stream.close()
 
-            // TODO return Security.decryptToString(bytes)
-        } catch (e: IOException){
+            return Security.decryptToString(bytes, user.password, user.salt)
+        } catch (e: IOException) {
             e.printStackTrace()
         }
 
