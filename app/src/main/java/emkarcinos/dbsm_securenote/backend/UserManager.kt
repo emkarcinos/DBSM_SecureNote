@@ -34,11 +34,10 @@ object UserManager {
 
     /**
      * Attempts to get a username by a given name.
-     * @param username: Username
      * @return If the user doesn't exist, returns null. Otherwise, returns a user object.
      */
-    fun getUserByName(username: String): User?{
-        return null //FileManager.grabUser(username)
+    fun getUser(): User?{
+        return FileManager.grabUser()
     }
 
     /**
