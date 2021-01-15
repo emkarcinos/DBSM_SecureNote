@@ -129,13 +129,8 @@ object FileManager {
 
             val secretFile = File(usersSubdirectory, encryptedPassphraseFileName)
             if(secretFile.exists()){
-                val secretFileStream = FileInputStream(secretFile)
-                val secretBytes = ByteArray(file.length().toInt())
 
-                secretFileStream.read(secretBytes)
-                secretFileStream.close()
-
-                user.encryptedPassword = secretBytes
+                user.encryptedPassword = getEncryptedKey()
                 user.hasFinerprint = true
             }
 
@@ -193,6 +188,16 @@ object FileManager {
         }
     }
 
+    fun getEncryptedKey(): ByteArray{
+        val file = File(usersSubdirectory, encryptedPassphraseFileName)
+        val secretFileStream = FileInputStream(file)
+        val secretBytes = ByteArray(file.length().toInt())
+
+        secretFileStream.read(secretBytes)
+        secretFileStream.close()
+
+        return secretBytes
+    }
 
     /**
      * Saves RSA public key to a file
