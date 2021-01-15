@@ -25,7 +25,7 @@ object Security {
     // Used to cipher/decipher passphrase by fingerpint
     val cipherRSA: Cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
 
-    private const val saltSize = 8
+    const val saltSize = 8
 
     private fun ByteArray.toHex(): String {
         return joinToString("") { "%02x".format(it) }
