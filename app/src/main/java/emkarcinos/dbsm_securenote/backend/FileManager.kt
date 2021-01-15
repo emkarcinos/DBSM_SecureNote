@@ -214,6 +214,9 @@ object FileManager {
         try {
             val file = File(usersSubdirectory, rsaPublicKeyFileName)
 
+            if(!file.exists())
+                return null
+
             val stream = FileInputStream(file)
             val bytes = ByteArray(file.length().toInt())
             stream.read(bytes)
