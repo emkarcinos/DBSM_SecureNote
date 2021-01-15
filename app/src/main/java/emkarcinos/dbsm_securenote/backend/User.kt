@@ -10,7 +10,7 @@ class User : Serializable{
     }
 
     var password: String
-
+    var encryptedPassword: ByteArray? = null
     // Salted password (salt is postfix)
     var passwordHash: String
     var salt: String
@@ -40,6 +40,9 @@ class User : Serializable{
     fun changePassword(password: String) {
         this.password = password
         passwordHash = Security.generateHash(password + salt)
+
+        if(hasFinerprint)
+            encryptedPassword = Security.encryptPassphrase(password, salt)
     }
 
 }

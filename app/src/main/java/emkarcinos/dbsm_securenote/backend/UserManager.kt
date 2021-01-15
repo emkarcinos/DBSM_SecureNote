@@ -5,18 +5,32 @@ object UserManager {
     /**
      * Attempts to create a new user object.
      * If the user already exists, it will not be created
-     * @param username: Username as string
      * @param password: Password as string
      * @return If the user already exists, returns null. Otherwise, returns a new user object.
      */
-    fun createNewUser(username: String, password: String): User?{
-        val newUser = User(username,password)
-        if (FileManager.userFileExists(newUser))
+    fun createNewUser(password: String): User?{
+        val newUser = User(password)
+        if (FileManager.userFileExists())
             return null
 
         FileManager.saveUserData(newUser)
         return newUser
     }
+
+
+    /**
+     * Adds fingerprint authentication method to the user.
+     * @param user: User object
+     */
+    fun addFingerprint(user: User){
+        val pubKey = Security.getOrCreateKeyFromKeystore().public
+        FileManager.saveRSAPublicKey(pubKey)
+        val encryptedPassphrase = Security.encryptPassphrase(user.password, user.password)
+        user.hasFinerprint = true
+        user.encryptedPassword = encryptedPassphrase
+        FileManager.saveUserData(user)
+    }
+
 
     /**
      * Attempts to get a username by a given name.
@@ -24,7 +38,7 @@ object UserManager {
      * @return If the user doesn't exist, returns null. Otherwise, returns a user object.
      */
     fun getUserByName(username: String): User?{
-        return FileManager.grabUser(username)
+        return null //FileManager.grabUser(username)
     }
 
     /**
@@ -35,6 +49,7 @@ object UserManager {
      */
     fun updateUserPassword(user: User, password: String) {
         user.changePassword(password)
+
         FileManager.saveUserData(user)
     }
 
@@ -64,10 +79,7 @@ object UserManager {
      * Note object.
      */
     fun getUsersNote(user: User): Note? {
-        return when (user.password.length) {
-            0 -> null
-            else -> FileManager.readNote(user)
-        }
+        return null
     }
 
     /**
@@ -78,10 +90,10 @@ object UserManager {
      */
     fun createNote(user: User): Note? {
         val note = Note("", user)
-        when {
-            FileManager.noteExists(note) -> return null
-            else -> FileManager.saveNote(note)
-        }
+//        when {
+//            FileManager.noteExists(note) -> return null
+//            else -> FileManager.saveNote(note)
+//        }
         return note
     }
 }
