@@ -37,15 +37,14 @@ class FileManagerTest {
         user.note = note
         FileManager.saveNote(note)
         val loadedNote = FileManager.readNote(user)
-        assertEquals(note.noteText, loadedNote?.noteText)
+        assertEquals(note.noteText, loadedNote)
     }
 
     @Test
     fun userSaveLoadTest(){
-        val username = "user"
-        val user = User(username, "pass")
+        val user = UserManager.createNewUser("password")!!
         FileManager.saveUserData(user)
-        val loadedUser = FileManager.grabUser(username)
+        val loadedUser = FileManager.grabUser()
         assertEquals(user.passwordHash, loadedUser?.passwordHash)
         assertEquals(user.salt, loadedUser?.salt)
     }
