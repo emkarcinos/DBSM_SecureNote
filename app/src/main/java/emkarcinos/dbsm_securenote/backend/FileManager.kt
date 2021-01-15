@@ -62,7 +62,7 @@ object FileManager {
      * @return true, if it has. Otherwise false
      */
     fun userFileExists(): Boolean {
-        val file = File(noteSubdirectory, hashedPasswordFileName)
+        val file = File(usersSubdirectory, hashedPasswordFileName)
         return file.exists()
     }
 
