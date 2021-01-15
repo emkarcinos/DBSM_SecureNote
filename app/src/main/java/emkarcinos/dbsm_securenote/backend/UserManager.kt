@@ -27,7 +27,7 @@ object UserManager {
     fun addFingerprint(user: User){
         val pubKey = Security.getOrCreateKeyFromKeystore().public
         FileManager.saveRSAPublicKey(pubKey)
-        val encryptedPassphrase = Security.encryptPassphrase(user.password, user.password)
+        val encryptedPassphrase = Security.encryptPassphrase(user.password, user.salt)
         user.hasFinerprint = true
         user.encryptedPassword = encryptedPassphrase
         FileManager.saveUserData(user)
