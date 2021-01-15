@@ -118,7 +118,7 @@ object Security {
                 setRandomizedEncryptionRequired(false)
             }
             val keygen = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore")
-            keygen.initialize(2048)
+            keygen.initialize(paramsBuilder.build())
             return keygen.generateKeyPair()
         }
 
