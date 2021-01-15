@@ -16,7 +16,7 @@ object Security {
     private const val hashAlgorithm = "SHA-512"
     val hashSize = MessageDigest.getInstance(hashAlgorithm).digestLength
 
-    private const val keystoreAlias = "securenote_rsa"
+    const val keystoreAlias = "securenote_rsa"
     // Used to cipher/decipher IV
     // ECB is safe here - we will encrypt only one block of data
     private val cipherAESECB: Cipher = Cipher.getInstance("AES/ECB/NoPadding")
