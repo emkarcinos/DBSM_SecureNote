@@ -4,8 +4,6 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import java.security.*
 import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.PBEKeySpec
@@ -17,11 +15,14 @@ object Security {
     val hashSize = MessageDigest.getInstance(hashAlgorithm).digestLength
 
     const val keystoreAlias = "securenote_rsa"
+
     // Used to cipher/decipher IV
     // ECB is safe here - we will encrypt only one block of data
     private val cipherAESECB: Cipher = Cipher.getInstance("AES/ECB/NoPadding")
+
     // Used to cipher/decipher the data
     private val cipherAESCBC: Cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+
     // Used to cipher/decipher passphrase by fingerpint
     val cipherRSA: Cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
 
@@ -72,7 +73,7 @@ object Security {
      * @param salt: salt as a string
      * @return ByteArray with IV and encrypted data.
      */
-    fun encryptString(lines: String, key: String, salt: String): ByteArray{
+    fun encryptString(lines: String, key: String, salt: String): ByteArray {
         val hashedPassword = generatePBKDF(key, salt).toByteArray()
         val dataBytes: ByteArray = lines.toByteArray()
 
@@ -108,7 +109,7 @@ object Security {
         keystore.load(null)
         val privateKey = keystore.getKey(keystoreAlias, null) as PrivateKey?
         val publicKey = keystore.getCertificate(keystoreAlias)?.publicKey
-        return if(privateKey != null && publicKey != null) KeyPair(publicKey, privateKey)
+        return if (privateKey != null && publicKey != null) KeyPair(publicKey, privateKey)
         else {
             val paramsBuilder = KeyGenParameterSpec.Builder(keystoreAlias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
             paramsBuilder.apply {
@@ -136,7 +137,7 @@ object Security {
      * @param salt: salt as a string
      * @return String with deciphered text
      */
-    fun decryptToString(bytes: ByteArray, key: String, salt: String): String{
+    fun decryptToString(bytes: ByteArray, key: String, salt: String): String {
         val hashedPassword = generatePBKDF(key, salt).toByteArray()
 
         val iv = ByteArray(cipherAESCBC.blockSize)
@@ -166,7 +167,7 @@ object Security {
      * @param salt: salt as string
      * @return ByteArray with encrypted data
      */
-    fun encryptPassphrase(passphrase: String, salt: String): ByteArray{
+    fun encryptPassphrase(passphrase: String, salt: String): ByteArray {
         val key: PublicKey = getOrCreateKeyFromKeystore().public
         cipherRSA.init(Cipher.ENCRYPT_MODE, key)
         cipherRSA.update(passphrase.toByteArray())
@@ -181,7 +182,7 @@ object Security {
      * @param data: Data to decrypt
      * @return decrypted passphrase
      */
-    fun decryptPassphrase(data: ByteArray): String{
+    fun decryptPassphrase(data: ByteArray): String {
         val decrypted = cipherRSA.doFinal(data)
         return String(decrypted).dropLast(saltSize * 2)
     }

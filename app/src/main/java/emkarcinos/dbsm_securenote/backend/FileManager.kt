@@ -91,13 +91,13 @@ object FileManager {
             if (user.hasFinerprint) {
                 val securePassFile = File(usersSubdirectory, encryptedPassphraseFileName)
 
-                if(!securePassFile.exists())
+                if (!securePassFile.exists())
                     securePassFile.createNewFile()
 
                 val printer = FileOutputStream(securePassFile)
                 printer.write(user.encryptedPassword)
                 printer.close()
-              }
+            }
 
         } catch (e: IOException) {
             e.printStackTrace()
@@ -128,7 +128,7 @@ object FileManager {
             val user = User(hash, salt)
 
             val secretFile = File(usersSubdirectory, encryptedPassphraseFileName)
-            if(secretFile.exists()){
+            if (secretFile.exists()) {
 
                 user.encryptedPassword = getEncryptedKey()
                 user.hasFinerprint = true
@@ -188,7 +188,7 @@ object FileManager {
         }
     }
 
-    fun getEncryptedKey(): ByteArray{
+    fun getEncryptedKey(): ByteArray {
         val file = File(usersSubdirectory, encryptedPassphraseFileName)
         val secretFileStream = FileInputStream(file)
         val secretBytes = ByteArray(file.length().toInt())
@@ -233,7 +233,7 @@ object FileManager {
         try {
             val file = File(usersSubdirectory, rsaPublicKeyFileName)
 
-            if(!file.exists())
+            if (!file.exists())
                 return null
 
             val stream = FileInputStream(file)

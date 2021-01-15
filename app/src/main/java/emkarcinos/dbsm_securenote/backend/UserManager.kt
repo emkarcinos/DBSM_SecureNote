@@ -1,7 +1,5 @@
 package emkarcinos.dbsm_securenote.backend
 
-import java.io.File
-
 object UserManager {
 
     /**
@@ -10,7 +8,7 @@ object UserManager {
      * @param password: Password as string
      * @return If the user already exists, returns null. Otherwise, returns a new user object.
      */
-    fun createNewUser(password: String): User?{
+    fun createNewUser(password: String): User? {
         val newUser = User(password)
         if (FileManager.userFileExists())
             return null
@@ -24,7 +22,7 @@ object UserManager {
      * Adds fingerprint authentication method to the user.
      * @param user: User object
      */
-    fun addFingerprint(user: User){
+    fun addFingerprint(user: User) {
         val pubKey = Security.getOrCreateKeyFromKeystore().public
         FileManager.saveRSAPublicKey(pubKey)
         val encryptedPassphrase = Security.encryptPassphrase(user.password, user.salt)
@@ -38,7 +36,7 @@ object UserManager {
      * Attempts to get a username by a given name.
      * @return If the user doesn't exist, returns null. Otherwise, returns a user object.
      */
-    fun getUser(): User?{
+    fun getUser(): User? {
         return FileManager.grabUser()
     }
 
@@ -64,7 +62,7 @@ object UserManager {
     fun validateCredentials(user: User, password: String): Boolean {
         val specifiedPasswordHash = Security.generateHash(password + user.salt)
 
-        if(specifiedPasswordHash != user.passwordHash)
+        if (specifiedPasswordHash != user.passwordHash)
             return false
         else
             user.password = password
@@ -80,7 +78,7 @@ object UserManager {
      * Note object.
      */
     fun getUsersNote(user: User): Note? {
-        return if(FileManager.noteExists())
+        return if (FileManager.noteExists())
             Note(FileManager.readNote(user)!!, user)
         else
             null

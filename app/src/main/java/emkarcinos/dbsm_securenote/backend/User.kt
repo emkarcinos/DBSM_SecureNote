@@ -2,7 +2,7 @@ package emkarcinos.dbsm_securenote.backend
 
 import java.io.Serializable
 
-class User : Serializable{
+class User : Serializable {
     constructor(password: String) {
         this.password = password
         this.salt = Security.generateSalt()
@@ -11,6 +11,7 @@ class User : Serializable{
 
     var password: String
     var encryptedPassword: ByteArray? = null
+
     // Salted password (salt is postfix)
     var passwordHash: String
     var salt: String
@@ -41,7 +42,7 @@ class User : Serializable{
         this.password = password
         passwordHash = Security.generateHash(password + salt)
 
-        if(hasFinerprint)
+        if (hasFinerprint)
             encryptedPassword = Security.encryptPassphrase(password, salt)
     }
 
