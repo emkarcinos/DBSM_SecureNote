@@ -28,4 +28,5 @@
     <string name="yes">Yes</string>
     <string name="no">Skip</string>
     <string name="finger_login">Log in using fingerprint</string>
+    <string name="note_header">Your secure note</string>
 </resources>
